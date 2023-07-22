@@ -8,16 +8,16 @@ void setup()
     M5.Lcd.clear(BLACK);
     M5.Lcd.setTextColor(WHITE);
     M5.Lcd.setTextSize(2);
+    M5.Lcd.print("FSR Value: ");
    // pinMode(analogPin, OUTPUT);
 }
 
 void loop()
 {
- uint16_t retVal = analogRead(analogPin);
- M5.Lcd.clear();
- M5.Lcd.setCursor(0, 0, 2);
- M5.Lcd.print("FSR Value: ");
- M5.Lcd.println(retVal);
- delay(250);
+    uint16_t retVal = analogRead(analogPin);
+    M5.Lcd.setCursor(30, 40, 2);
+    M5.Lcd.fillRect(30, 40, 280, 40, BLACK);
+    M5.Lcd.println(retVal);
+    delay(250);
 
 }
