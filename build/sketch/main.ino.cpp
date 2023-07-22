@@ -5,11 +5,6 @@
 /* After M5CoreS3 is started or reset the program in the setUp()
 function will be run, and this part will only be run once.
 */
-#line 6 "D:\\M5StackTelemetry\\source\\main\\main.ino"
-void setup();
-#line 14 "D:\\M5StackTelemetry\\source\\main\\main.ino"
-void loop();
-#line 6 "D:\\M5StackTelemetry\\source\\main\\main.ino"
 void setup() {
     M5.begin(true, true, false);  // Init M5CoreS3. 
     M5.Lcd.setTextSize(2);        // Set text size. 
