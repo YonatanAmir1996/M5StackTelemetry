@@ -296,5 +296,4 @@ D:\M5StackTelemetry\build\sketch\PbHub.ino.cpp.o: \
  C:\Users\Yonat\OneDrive\מסמכים\Arduino\libraries\BMI270_Sensor\src/bmi2_defs.h \
  C:\Users\Yonat\OneDrive\מסמכים\Arduino\libraries\BMI270_Sensor\src/bmm150.h \
  C:\Users\Yonat\OneDrive\מסמכים\Arduino\libraries\BMI270_Sensor\src/bmm150_defs.h \
- D:\M5StackTelemetry\build\sketch\porthub.h \
- C:\Users\Yonat\OneDrive\מסמכים\Arduino\libraries\Adafruit_NeoPixel/Adafruit_NeoPixel.h
+ D:\M5StackTelemetry\build\sketch\porthub.h
