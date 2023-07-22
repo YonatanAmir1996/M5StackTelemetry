@@ -1,4 +1,4 @@
-#line 1 "D:\\M5StackTelemetry\\source\\main\\debug_custom.json"
+#line 1 "D:\\M5StackTelemetry\\Example\\PbHub\\debug_custom.json"
 {
 	"name":"Arduino on ESP32-S3",
 	"toolchainPrefix":"xtensa-esp32s3-elf",

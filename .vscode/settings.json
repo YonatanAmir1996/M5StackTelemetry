@@ -1,5 +1,18 @@
 {
     "C_Cpp.default.includePath": [
-        "D:/ArduinoIDE/libraries/libraries/M5CoreS3/src"
-    ]
+        "D:/ArduinoIDE/libraries/libraries/M5CoreS3/src",
+        "D:/ArduinoIDE/libraries/libraries/ClosedCube_TCA9548A",
+        "D:/ArduinoIDE/libraries/libraries/MAX30100lib",
+        "D:/ArduinoIDE/libraries/libraries/Adafruit_NeoPixel"
+    ],
+    "files.associations": {
+        "array": "cpp",
+        "deque": "cpp",
+        "string": "cpp",
+        "unordered_map": "cpp",
+        "vector": "cpp",
+        "string_view": "cpp",
+        "initializer_list": "cpp",
+        "*.tcc": "cpp"
+    }
 }
