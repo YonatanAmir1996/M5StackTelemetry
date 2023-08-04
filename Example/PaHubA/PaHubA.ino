@@ -14,7 +14,24 @@ on the TFT. 该程序连续扫描地址 1-127 并显示在内部(外部)I2C发�
 */
 #include <M5CoreS3.h>
 
+#include "MAX30100_PulseOximeter.h"
+
+
+#define REPORTING_PERIOD_MS 100
+
+uint32_t tsLastReport = 0;
+
+#define HEART_UNIT_ADDR 0x57
 #define PAHUB_ADDR 0X70
+
+// PulseOximeter is the higher level interface to the sensor
+// it offers:
+//  * beat detection reporting
+//  * heart rate calculation
+//  * SpO2 (oxidation level) calculation
+PulseOximeter pox;
+uint8_t whichPort = 0;
+bool wasInit = false;
 
 void portselectall(uint8_t ports) {  
   Wire.beginTransmission(PAHUB_ADDR);
@@ -34,14 +51,10 @@ void portselect(uint8_t i) {
 
 
 void setup() {
+    int error = 0;
   // put your setup code here, to run once:
   M5.begin(true, true, false);
   Wire.begin(2, 1);
-}
-
-void loop() {
-  // put your main code here, to run repeatedly:
-  int error = 0;
   for(int i = 0; i < 6; i++){
      portselect(i);
      M5.Lcd.setCursor(0, i * 40, 2);
@@ -50,14 +63,50 @@ void loop() {
        Wire.beginTransmission(address);
        error = Wire.endTransmission();
        if(error == 0){
-        if((address == 0x70) || (address == 0x75)) continue;
-          M5.Lcd.print(":  Found I2C 0x");M5.Lcd.print(address,HEX);break;
+        if((address == 0x70) || (address == 0x75))
+        { 
+          continue;
+        }
+         
+          if(address == HEART_UNIT_ADDR)
+          {
+            M5.Lcd.print(":  Found I2C 0x");
+            M5.Lcd.print(address,HEX);
+            delay(1000);
+            pox.begin();
+            wasInit = true;
+            M5.Lcd.fillScreen(BLACK);
+            break;
+          }
        }else{
           M5.Lcd.setCursor(100, i * 40);
           M5.Lcd.fillRect(100, i * 40, 280, 40, BLACK);
        }
       delay(1);
      }
+     if(wasInit)
+     {
+      break;
+     }
   }
+}
 
+void loop() {
+     // Make sure to call update as fast as possible
+    pox.update();
+
+    // Asynchronously dump heart rate and oxidation levels to the serial
+    // For both, a value of 0 means "invalid"
+    if (millis() - tsLastReport > REPORTING_PERIOD_MS) {
+        M5.Lcd.setTextFont(4);
+        M5.Lcd.setCursor(10, 30, 4);
+        M5.Lcd.print("Heart rate:");
+        M5.Lcd.print(pox.getHeartRate());
+        M5.Lcd.setCursor(10, 60, 4);
+        M5.Lcd.print("bpm / SpO2:");
+        M5.Lcd.print(pox.getSpO2());
+        M5.Lcd.println("%");
+
+        tsLastReport = millis();
+    }
 }
