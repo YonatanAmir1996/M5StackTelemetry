@@ -1,69 +1,127 @@
-# 1 "D:\\M5StackTelemetry\\Example\\PbHub\\PbHub.ino"
+# 1 "D:\\M5StackTelemetry\\Example\\PaHubA\\PaHubA.ino"
 /*
 
-    Description: Use Pbhub to read the analog input value of the slave device,
+*******************************************************************************
 
-   or drive multiple sets of RGB LEDs.
+* Copyright (c) 2023 by M5Stack
+
+*                  Equipped with M5CoreS3 sample source code
+
+*                          配套  M5CoreS3 示例源代码
+
+* Visit for more information: https://docs.m5stack.com/en/core/CoreS3
+
+* 获取更多资料请访问: https://docs.m5stack.com/zh_CN/core/CoreS3
+
+*
+
+* Describe: I2C Scanner.  I2C探测
+
+* Date: 2023/5/5
+
+*******************************************************************************
+
+This program scans the addresses 1-127 continuosly and shows the devices found
+
+on the TFT. 该程序连续扫描地址 1-127 并显示在内部(外部)I2C发现的设备。
 
 */
-# 5 "D:\\M5StackTelemetry\\Example\\PbHub\\PbHub.ino"
-# 6 "D:\\M5StackTelemetry\\Example\\PbHub\\PbHub.ino" 2
-# 7 "D:\\M5StackTelemetry\\Example\\PbHub\\PbHub.ino" 2
-# 8 "D:\\M5StackTelemetry\\Example\\PbHub\\PbHub.ino" 2
+# 15 "D:\\M5StackTelemetry\\Example\\PaHubA\\PaHubA.ino"
+# 16 "D:\\M5StackTelemetry\\Example\\PaHubA\\PaHubA.ino" 2
 
-
-int freq = 10000;
-int ledChannel = 0;
-int resolution = 10;
+# 18 "D:\\M5StackTelemetry\\Example\\PaHubA\\PaHubA.ino" 2
 
 
 
 
-PortHub porthub;
-uint8_t HUB_ADDR[6] = {0x40, 0x50, 0x60,
-                       0x70, 0x80, 0xA0};
+uint32_t tsLastReport = 0;
 
 
 
 
-Adafruit_NeoPixel pixels = Adafruit_NeoPixel(
-    3 /*定义NeoPixel控制灯灯数量*/, 9 /* port b*/,
-    ((1 << 6) | (1 << 4) | (0 << 2) | (2)) /*|< Transmit as G,R,B*/ + 0x0000 /*|< 800 KHz data transmission*/); // set number of LEDs, pin number, LED type.
-                            // 设置灯的数量,控制引脚编号,灯灯类型
+// PulseOximeter is the higher level interface to the sensor
+// it offers:
+//  * beat detection reporting
+//  * heart rate calculation
+//  * SpO2 (oxidation level) calculation
+PulseOximeter pox;
+uint8_t whichPort = 0;
+bool wasInit = false;
+
+void portselectall(uint8_t ports) {
+  Wire.beginTransmission(0X70);
+  Wire.write(ports&0x3f);
+  Wire.endTransmission();
+}
+
+
+//Hub range is 0 to 5
+void portselect(uint8_t i) {
+  if (i > 7) return;
+
+  Wire.beginTransmission(0X70);
+  Wire.write(1 << i);
+  Wire.endTransmission();
+}
 
 
 void setup() {
-    M5.begin(true, true, true);
-    porthub.begin();
-    M5.Lcd.clear(0x0000 /*   0,   0,   0 */);
-    M5.Lcd.setTextColor(0xFFFF /* 255, 255, 255 */);
-    M5.Lcd.setTextSize(4);
-    ledcSetup(
-        ledChannel, freq,
-        resolution); // Sets the frequency and number of counts corresponding
-                      // to the channel.  设置通道对应的频率和计数位数
-   /* ledcAttachPin(motor_pin, ledChannel);  // Binds the specified channel to the specified I/O port
+    int error = 0;
+  // put your setup code here, to run once:
+  M5.begin(true, true, false);
+  Wire.begin(2, 1);
+  for(int i = 0; i < 6; i++){
+     portselect(i);
+     M5.Lcd.setCursor(0, i * 40, 2);
+     M5.Lcd.print("TCA Port"); M5.Lcd.print(i);
+     for(uint8_t address = 1; address < 127; address++){
+       Wire.beginTransmission(address);
+       error = Wire.endTransmission();
+       if(error == 0){
+        if((address == 0x70) || (address == 0x75))
+        {
+          continue;
+        }
 
-                      // for output.  将指定通道绑定到指定 IO 口上以实现输出
-
-                      */
-# 43 "D:\\M5StackTelemetry\\Example\\PbHub\\PbHub.ino"
-                         ledcAttachPin(
-        12 /* PB_HUB OUTPUT PORT0*/,
-        ledChannel); // Binds the specified channel to the specified I/O port
-                      // for output.  将指定通道绑定到指定 IO 口上以实现输出
-    pixels.begin(); // Init the NeoPixel library.  初始化NeoPixel库
+          if(address == 0x57)
+          {
+            M5.Lcd.print(":  Found I2C 0x");
+            M5.Lcd.print(address,16);
+            delay(1000);
+            pox.begin();
+            wasInit = true;
+            M5.Lcd.fillScreen(0x0000 /*   0,   0,   0 */);
+            break;
+          }
+       }else{
+          M5.Lcd.setCursor(100, i * 40);
+          M5.Lcd.fillRect(100, i * 40, 280, 40, 0x0000 /*   0,   0,   0 */);
+       }
+      delay(1);
+     }
+     if(wasInit)
+     {
+      break;
+     }
+  }
 }
 
 void loop() {
-    M5.Lcd.clear(0x0000 /*   0,   0,   0 */);
-    pixels.setPixelColor(0, pixels.Color(100, 0, 0)); // Bright red
-    pixels.setPixelColor(1, pixels.Color(0, 100, 0)); // Bright green
-    pixels.setPixelColor(2, pixels.Color(0, 0, 100)); // Bright blue
-    pixels.show(); // sends the updated color to the hardware.
-                    // 将更新后的颜色发送到硬件。
-    porthub.hub_a_wire_value_A(0x40, 512);
-    delay(1000);
-    porthub.hub_a_wire_value_A(0x40, 0);
-    delay(1000);
+     // Make sure to call update as fast as possible
+    pox.update();
+
+    // Asynchronously dump heart rate and oxidation levels to the serial
+    // For both, a value of 0 means "invalid"
+    if (millis() - tsLastReport > 100) {
+        M5.Lcd.setTextFont(4);
+        M5.Lcd.setCursor(10, 30, 4);
+        M5.Lcd.print("Heart rate:");
+        M5.Lcd.print(pox.getHeartRate());
+        M5.Lcd.setCursor(10, 60, 4);
+        M5.Lcd.print("bpm / SpO2:");
+        M5.Lcd.print(pox.getSpO2());
+        M5.Lcd.println("%");
+
+        tsLastReport = millis();
+    }
 }
