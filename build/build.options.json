@@ -1,5 +1,5 @@
 {
-  "additionalFiles": "..\\..,..\\..,..\\..",
+  "additionalFiles": "..\\..",
   "builtInToolsFolders": "",
   "compiler.optimization_flags": "-Os",
   "customBuildProperties": "",
@@ -7,5 +7,5 @@
   "hardwareFolders": "C:\\Users\\Yonat\\AppData\\Local\\Arduino15\\packages",
   "otherLibrariesFolders": "C:\\Users\\Yonat\\OneDrive\\מסמכים\\Arduino\\libraries",
   "runtime.ide.version": "10607",
-  "sketchLocation": "D:\\M5StackTelemetry\\Example\\PbHub"
+  "sketchLocation": "D:\\M5StackTelemetry\\Example\\PaHubA"
 }

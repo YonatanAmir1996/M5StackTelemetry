@@ -35,15 +35,6 @@ PulseOximeter pox;
 uint8_t whichPort = 0;
 bool wasInit = false;
 
-#line 36 "D:\\M5StackTelemetry\\Example\\PaHubA\\PaHubA.ino"
-void portselectall(uint8_t ports);
-#line 44 "D:\\M5StackTelemetry\\Example\\PaHubA\\PaHubA.ino"
-void portselect(uint8_t i);
-#line 53 "D:\\M5StackTelemetry\\Example\\PaHubA\\PaHubA.ino"
-void setup();
-#line 94 "D:\\M5StackTelemetry\\Example\\PaHubA\\PaHubA.ino"
-void loop();
-#line 36 "D:\\M5StackTelemetry\\Example\\PaHubA\\PaHubA.ino"
 void portselectall(uint8_t ports) {  
   Wire.beginTransmission(PAHUB_ADDR);
   Wire.write(ports&0x3f);
