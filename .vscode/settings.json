@@ -13,6 +13,11 @@
         "vector": "cpp",
         "string_view": "cpp",
         "initializer_list": "cpp",
-        "*.tcc": "cpp"
+        "*.tcc": "cpp",
+        "memory": "cpp",
+        "imu.h": "c",
+        "random": "cpp",
+        "new": "cpp",
+        "i2cdeviceabs.h": "c"
     }
 }
