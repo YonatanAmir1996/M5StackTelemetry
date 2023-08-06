@@ -34,7 +34,8 @@ typedef enum
 typedef enum
 {
     /* Internal devices mapping */
-    DEVICE_START_INTERNAL = 0,
+    DEVICE_START_ALL_DEVICES = 0,
+    DEVICE_START_INTERNAL = DEVICE_START_ALL_DEVICES,
     DEVICE_IMU = DEVICE_START_INTERNAL,
     DEVICE_END_INTERNAL,
     /* External devices mapping PAHUB */

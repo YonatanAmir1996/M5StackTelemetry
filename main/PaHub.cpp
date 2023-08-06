@@ -2,7 +2,7 @@
 #include "PaHub.h"
 
 
-PaHub PaHubDevice;
+PaHub PortAHub;
 
 PaHub::PaHub() :
 I2CDeviceAbs(PA_HUB_I2C_ADDR)
@@ -16,13 +16,6 @@ I2CDeviceAbs(PA_HUB_I2C_ADDR)
     }
 }
 
-void PaHub::portSelect(PaHubPort_e port)
-{
-    /* Method selects a port to transimition info*/
-    Wire.beginTransmission(getBaseAddr());
-    Wire.write(1 << (uint8_t)port);
-    Wire.endTransmission(); 
-}
 
 void PaHub::scan()
 {
@@ -33,7 +26,11 @@ void PaHub::scan()
     {
         i2cAddr = 0x1;
         // Switching to relevent port
-        portSelect(static_cast<PaHubPort_e>(port));
+        Wire.beginTransmission(getBaseAddr());
+        Wire.write(1 << port);
+        Wire.endTransmission(); 
+
+        /* Finds which i2c address is connected */
         for(; i2cAddr < MAX_I2C_ADDR; i2cAddr++)
         {
             Wire.beginTransmission(i2cAddr);
@@ -42,6 +39,7 @@ void PaHub::scan()
                 // Saving in map the device found in pahub.
                 i2cAddrToPortMap[i2cAddr] = static_cast<PaHubPort_e>(port);
             }
+            delay(1);
         }
     }
 }
