@@ -9,11 +9,10 @@ class PaHub : public I2CDeviceAbs
     public:
         PaHub();
         void scan();
-        void portSelect(PaHubPort_e port);
 
     public:
         PaHubPort_e i2cAddrToPortMap[MAX_I2C_ADDR]; // Mapping between I2C address to the port it is connected
 };
 
-extern PaHub PaHubDevice;
+extern PaHub PortAHub;
 #endif

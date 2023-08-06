@@ -3,7 +3,8 @@
 
 #include "DeviceAbs.h"
 
-class IMU: public DeviceAbs {
+class IMU: public DeviceAbs 
+{
     public:
         IMU();
         bool begin()  override;
