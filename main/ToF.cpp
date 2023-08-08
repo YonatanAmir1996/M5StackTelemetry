@@ -42,23 +42,29 @@ void ToF::update()
 
 void ToF::print()
 {
-    M5.Lcd.fillScreen(BLACK);
-    M5.Lcd.setCursor(0,0);
-    M5.Lcd.setTextFont(2);
-    M5.Lcd.printf("ToF:\n");
-    M5.Lcd.setTextFont(1);
-    //The ST library returns the data transposed from zone mapping shown in datasheet
-    //Pretty-print data with increasing y, decreasing x to reflect reality
-    for (int y = 0 ; y <= imageWidth * (imageWidth - 1) ; y += imageWidth)
+    switchPort();
+    if (myImager.isDataReady())
     {
-        M5.Lcd.print("[ ");
-        for (int x = imageWidth - 1 ; x >= 0 ; x--)
+        myImager.getRangingData(&measurementData); // RangingData
+        M5.Lcd.fillScreen(BLACK);
+        M5.Lcd.setCursor(0,0);
+        M5.Lcd.setTextFont(2);
+        M5.Lcd.printf("ToF:\n");
+        M5.Lcd.setTextFont(1);
+        //The ST library returns the data transposed from zone mapping shown in datasheet
+        //Pretty-print data with increasing y, decreasing x to reflect reality
+        for (int y = 0 ; y <= imageWidth * (imageWidth - 1) ; y += imageWidth)
         {
-            
-            M5.Lcd.print(measurementData.distance_mm[x + y]);
-            M5.Lcd.print(" ");
+            M5.Lcd.print("[ ");
+            for (int x = imageWidth - 1 ; x >= 0 ; x--)
+            {
+                
+                M5.Lcd.print(measurementData.distance_mm[x + y]);
+                M5.Lcd.print(" ");
+            }
+            M5.Lcd.print("]");
+            M5.Lcd.println();
         }
-        M5.Lcd.print("]");
-        M5.Lcd.println();
     }
+    delay(100);
 }

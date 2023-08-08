@@ -14,6 +14,7 @@ class PulseOximeterSensor : public PaHubDeviceAbs
 
     private:
         PulseOximeter pox; 
+        uint32_t      tsLastReport;
 };
 
 #endif
