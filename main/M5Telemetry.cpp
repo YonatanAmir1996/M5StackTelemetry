@@ -21,7 +21,7 @@ void M5Telemetry::scan()
 {
     PaHubPort_e        tempPort;
     PaHubDeviceAbs     *pPaHubDeviceHandler;
-
+    bool                deviceExists;
 
     // Internal Devices handling
     pDeviceHandlers[DEVICE_IMU] = static_cast<DeviceAbs*>(&imuDevice);
@@ -38,7 +38,7 @@ void M5Telemetry::scan()
     for(uint8_t device = (uint8_t)DEVICE_START_EXTERNAL_PA_HUB; device < (uint8_t)DEVICE_END_EXTERNAL_PA_HUB; device++)
     {
         pPaHubDeviceHandler = static_cast<PaHubDeviceAbs*>(pDeviceHandlers[device]);
-
+        //deviceExists        = false;
         tempPort = PortAHub.i2cAddrToPortMap[pPaHubDeviceHandler->getBaseAddr()];
         USBSerial.printf("i2c addr %02X | PORT %u", pPaHubDeviceHandler->getBaseAddr(), tempPort);
         if(tempPort != PA_HUB_INVALID_PORT)
@@ -52,10 +52,17 @@ void M5Telemetry::scan()
             }
             else
             {
-                pPaHubDeviceHandler[device] = NULL; // Remove from available devices
+                pDeviceHandlers[device] = NULL; // Remove from available devices
             }
         }
+        else
+        {
+            pDeviceHandlers[device] = NULL; // Remove from available devices
+        }
     }
+
+    // PB-HUB
+    PbHub.setPort(PortAHub.i2cAddrToPortMap[PbHub.getBaseAddr()]);
 
     // PORT B handling
     
@@ -77,14 +84,29 @@ void M5Telemetry::update()
 
 void M5Telemetry::standAlonePrint()
 {
-    for(uint8_t device = (uint8_t)DEVICE_START_ALL_DEVICES; device < (uint8_t)DEVICE_MAX_DEVICES; device++)
+    uint8_t state = (DeviceName_e)DEVICE_IMU;
+    while(1)
     {
-        if(pDeviceHandlers[device])
+        if(PbHub.IfButtonPressed())
         {
-            // Update sensor data
-            pDeviceHandlers[device]->print();
+            state += 1;
+            while(!pDeviceHandlers[state])
+            {
+                state += 1;
+                if(state == DEVICE_MAX_DEVICES)
+                {
+                    state = DEVICE_IMU;
+                }
+            }
+            if(state == DEVICE_MAX_DEVICES)
+            {
+                state = DEVICE_IMU;
+            }
         }
-        delay(500);
+        if(pDeviceHandlers[state])
+        {
+            pDeviceHandlers[state]->print();
+        }
     }
 
 }

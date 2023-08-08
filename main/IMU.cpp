@@ -21,6 +21,7 @@ void IMU::update()
 
 void IMU::print()
 {
+    M5.IMU.Update();
     M5.Lcd.fillScreen(BLACK);
     M5.Lcd.setCursor(0,0);
     M5.Lcd.setTextFont(2);
@@ -32,4 +33,5 @@ void IMU::print()
     M5.Lcd.printf("\nAcc_X = %4.0f | Acc_Y = %4.0f | Acc_Z = %4.0f\n",
                      M5.IMU.accel_data.x, M5.IMU.accel_data.y,
                      M5.IMU.accel_data.z);
+    delay(100);
 }

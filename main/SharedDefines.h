@@ -13,14 +13,6 @@
 #define PA_HUB_I2C_ADDR                  0x70
 #define MAX_I2C_ADDR                     0x7F
 
-
-#define PB_HUB_PORT_0_ADDR               0x40;
-#define PB_HUB_PORT_1_ADDR               0x50;
-#define PB_HUB_PORT_2_ADDR               0x60;
-#define PB_HUB_PORT_3_ADDR               0x70;
-#define PB_HUB_PORT_4_ADDR               0x80;
-#define PB_HUB_PORT_5_ADDR               0xA0;
-
 #define RGB_PORT_B_PIN 9
 
 
@@ -53,7 +45,7 @@ typedef enum
     
     /* External device mapping Port B*/
     DEVICE_START_EXTERNAL_PORT_B = DEVICE_END_EXTERNAL_PB_HUB,
-    DEVICE_RGB_LED,
+    DEVICE_RGB_LED = DEVICE_START_EXTERNAL_PORT_B,
     DEVICE_END_EXTERNAL_PORT_B,
     DEVICE_MAX_DEVICES = DEVICE_END_EXTERNAL_PORT_B
 }DeviceName_e;

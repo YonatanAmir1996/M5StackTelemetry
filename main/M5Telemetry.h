@@ -6,6 +6,7 @@
 #include "PulseOximeterSensor.h"
 #include "Amg8833.h"
 #include "ToF.h"
+#include "PbHubDevice.h"
 
 // Class M5 telemetry
 class M5Telemetry 

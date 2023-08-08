@@ -8,6 +8,6 @@ void setup()
 
 void loop()
 {
-   M5Tel.update();
+   //M5Tel.update();
    M5Tel.standAlonePrint(); 
 }
