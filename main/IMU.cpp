@@ -21,7 +21,7 @@ void IMU::update()
 
 void IMU::print()
 {
-    M5.IMU.Update();
+    update();
     M5.Lcd.fillScreen(BLACK);
     M5.Lcd.setCursor(0,0);
     M5.Lcd.setTextFont(2);

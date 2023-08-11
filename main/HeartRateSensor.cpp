@@ -26,7 +26,16 @@ bool HeartRateSensor::begin()
 
 void HeartRateSensor::update()
 {
-    pox.update();
+    switchPort();
+    setFrequency();
+    tsLastReport = millis();
+
+    /* Gather samples*/
+    while((millis() - tsLastReport) < REPORTING_PERIOD_MS)
+    {
+    // Make sure to call update as fast as possible
+        pox.update();
+    }
 }
 
 void HeartRateSensor::shutdown()
@@ -54,21 +63,10 @@ bool HeartRateSensor::restart()
 
 void HeartRateSensor::print()
 {
-    switchPort();
-    setFrequency();
-    tsLastReport = millis();
-
-    /* Gather samples*/
-    while((millis() - tsLastReport) < REPORTING_PERIOD_MS)
-    {
-    // Make sure to call update as fast as possible
-        pox.update();
-    }
-    USBSerial.printf("\ninside here5\n");
-
+    update();
     // Asynchronously dump heart rate and oxidation levels to the serial
     // For both, a value of 0 means "invalid"
-    M5.Lcd.fillScreen(BLACK);
+    M5.Lcd.clear();
     M5.Lcd.setTextFont(4);
     M5.Lcd.setCursor(10, 30, 4);
     M5.Lcd.print("Heart rate:");

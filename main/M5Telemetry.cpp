@@ -1,5 +1,6 @@
 #include <M5CoreS3.h>
 #include "M5Telemetry.h"
+#include "PbHubDevice.h"
 
 M5Telemetry M5Tel; // Extern
 
@@ -52,7 +53,7 @@ void M5Telemetry::scanPaHub()
     }
 }
 
-void M5Telemetry::scan()
+void M5Telemetry::scan(uint8_t buttonHubAddr, uint8_t fsrAddr)
 {
     PaHubPort_e        tempPort;
     PaHubDeviceAbs     *pPaHubDeviceHandler;
@@ -70,6 +71,7 @@ void M5Telemetry::scan()
     pDeviceHandlers[DEVICE_VL3L5CX_TOF]          = static_cast<DeviceAbs*>(&tofSensor);
 
     // Mapping i2c address to the connect port in pahub
+    M5.Lcd.printf("Scanning PaHub Devices...\n");
     scanPaHub(); 
 
     for(uint8_t device = (uint8_t)DEVICE_START_EXTERNAL_PA_HUB; device < (uint8_t)DEVICE_END_EXTERNAL_PA_HUB; device++)
@@ -99,7 +101,25 @@ void M5Telemetry::scan()
     }
 
     // PB-HUB
+    M5.Lcd.printf("Scanning PbHub Decvices...\n");
     PbHub.setPort(i2cAddrToPortMap[PbHub.getBaseAddr()]);
+
+    pDeviceHandlers[DEVICE_FSR402] = static_cast<DeviceAbs*>(&fsr);
+
+    // Sensors
+    if(fsrAddr != PB_HUB_PORT_INVALID_ADDR)
+    {
+        fsr.begin(fsrAddr);
+    }
+
+    // internal devices (interrupt / lcd handling etc...)
+    if(buttonHubAddr == PB_HUB_PORT_INVALID_ADDR)   
+    {
+        M5.Lcd.printf("Button must be set!\n Reset Device.");
+        while(1) {};
+    }
+    button.begin(buttonHubAddr); 
+
 
     // PORT B handling
     
@@ -121,8 +141,9 @@ void M5Telemetry::update()
 
 void M5Telemetry::standAlonePrint()
 {
+    /* Print to screen and update values for each module*/
     uint8_t state = (DeviceName_e)DEVICE_IMU;
-    bool    wasHeartRateUnit = (state == DEVICE_HEART_UNIT_MAX_30100);
+
     //Find first activated sensor
     while(!pDeviceHandlers[state])
     {
@@ -130,7 +151,7 @@ void M5Telemetry::standAlonePrint()
     }
     while(1)
     {
-        if(PbHub.IfButtonPressed())
+        if(button.IfButtonPressed())
         {
             /* Shutdown sensor prevent I2C issues */
             static_cast<HeartRateSensor*>(pDeviceHandlers[state])->shutdown();

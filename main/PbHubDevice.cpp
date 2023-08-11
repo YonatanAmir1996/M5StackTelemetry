@@ -13,7 +13,6 @@
 PbHubDevice PbHub;
 
 PbHubDevice::PbHubDevice() :
-buttonHubPortAddr(PB_HUB_PORT_0_ADDR),
 PaHubDeviceAbs(PB_HUB_I2C_ADDR)
 {
 
@@ -33,6 +32,7 @@ uint16_t PbHubDevice::readAnalogVal(uint8_t addr) {
     uint8_t RegValue_L = 0;
     uint8_t RegValue_H = 0;
     uint8_t error;
+
     switchPort();
     Wire.beginTransmission(getBaseAddr());
     Wire.write(addr | 0x06);
@@ -46,17 +46,4 @@ uint16_t PbHubDevice::readAnalogVal(uint8_t addr) {
         RegValue_H = Wire.read();
     }
     return (RegValue_H << 8) | RegValue_L;
-}
-
-bool PbHubDevice::IfButtonPressed()
-{
-    uint32_t count = 0;
-
-    while(readAnalogVal(buttonHubPortAddr) != 0)
-    {
-        count++;
-        delay(1);
-    }
-
-    return (count > 0);
 }

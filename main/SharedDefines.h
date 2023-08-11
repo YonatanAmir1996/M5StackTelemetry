@@ -16,6 +16,15 @@
 #define RGB_PORT_B_PIN 9
 
 
+#define PB_HUB_PORT_0_ADDR               0x40
+#define PB_HUB_PORT_1_ADDR               0x50
+#define PB_HUB_PORT_2_ADDR               0x60
+#define PB_HUB_PORT_3_ADDR               0x70
+#define PB_HUB_PORT_4_ADDR               0x80
+#define PB_HUB_PORT_5_ADDR               0xA0
+#define PB_HUB_PORT_INVALID_ADDR         0xFF
+
+
 /*Enums*/
 typedef enum
 {
@@ -40,12 +49,13 @@ typedef enum
     /* External device mapping PBHUB */
     DEVICE_START_EXTERNAL_PB_HUB = DEVICE_END_EXTERNAL_PA_HUB,
     DEVICE_FSR402 = DEVICE_START_EXTERNAL_PB_HUB,
-    DEVICE_DC_MOTOR,
+    DEVICE_BUTTON,      //Don't init in pDevicesHandlers !
+    DEVICE_DC_MOTOR,    //Don't init in pDevicesHandlers !
     DEVICE_END_EXTERNAL_PB_HUB,
     
     /* External device mapping Port B*/
     DEVICE_START_EXTERNAL_PORT_B = DEVICE_END_EXTERNAL_PB_HUB,
-    DEVICE_RGB_LED = DEVICE_START_EXTERNAL_PORT_B,
+    DEVICE_RGB_LED = DEVICE_START_EXTERNAL_PORT_B, //Don't init in pDevicesHandlers !
     DEVICE_END_EXTERNAL_PORT_B,
     DEVICE_MAX_DEVICES = DEVICE_END_EXTERNAL_PORT_B
 }DeviceName_e;

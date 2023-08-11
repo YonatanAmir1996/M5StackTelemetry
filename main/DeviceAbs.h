@@ -10,6 +10,7 @@
 class DeviceAbs {
     public:
         virtual bool begin();
+        virtual bool begin(uint8_t addr);
         virtual void update();
         virtual void print();
         virtual bool restart();
