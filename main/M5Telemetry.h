@@ -2,8 +2,7 @@
 #define M5_TELEMETRY_H
 
 #include "IMU.h"
-#include "PaHub.h"
-#include "PulseOximeterSensor.h"
+#include "HeartRateSensor.h"
 #include "Amg8833.h"
 #include "ToF.h"
 #include "PbHubDevice.h"
@@ -18,16 +17,17 @@ class M5Telemetry
         void standAlonePrint();
         void scan();
         void update();
-
+        void scanPaHub();
     public:
         RunningMode_e       runningMode;  
 
     private:
         DeviceAbs           *pDeviceHandlers[DEVICE_MAX_DEVICES];
         IMU                 imuDevice;
-        PulseOximeterSensor pulseOximeterDevice;
+        HeartRateSensor     pulseOximeterDevice;
         Amg8833             gridEyeSensor;
         ToF                 tofSensor;
+        PaHubPort_e         i2cAddrToPortMap[MAX_I2C_ADDR]; // Mapping between I2C address to the port it is connected
 
 };
 

@@ -14,7 +14,15 @@ Amg8833::~Amg8833()
 
 bool Amg8833::begin()
 {
-    return gridEye.begin();
+    uint8_t count = 0;
+
+    while(!gridEye.begin() && (count < NUMBER_OF_BEGIN_TRIES))
+    {
+        count++;
+        delay(100);
+    }
+
+    return (count < NUMBER_OF_BEGIN_TRIES);
 }
 
 void Amg8833::update()

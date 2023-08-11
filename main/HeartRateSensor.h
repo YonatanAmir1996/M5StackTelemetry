@@ -4,17 +4,20 @@
 #include "PaHubDeviceAbs.h"
 #include "MAX30100_PulseOximeter.h"
 
-class PulseOximeterSensor : public PaHubDeviceAbs
+class HeartRateSensor : public PaHubDeviceAbs
 {
     public:
-        PulseOximeterSensor();
+        HeartRateSensor();
         bool begin()  override;
         void update() override;
         void print()  override;
+        bool restart() override;
+        void shutdown();
+        void setFrequency();
 
     private:
-        PulseOximeter pox; 
         uint32_t      tsLastReport;
+        PulseOximeter pox;
 };
 
 #endif

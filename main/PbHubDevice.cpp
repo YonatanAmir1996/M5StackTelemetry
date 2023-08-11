@@ -34,11 +34,10 @@ uint16_t PbHubDevice::readAnalogVal(uint8_t addr) {
     uint8_t RegValue_H = 0;
     uint8_t error;
     switchPort();
-    USBSerial.printf("Switched to port %u\n", getPort());
     Wire.beginTransmission(getBaseAddr());
     Wire.write(addr | 0x06);
     error = Wire.endTransmission();
-    USBSerial.printf("error ? %u\n", error);
+
     
 
     Wire.requestFrom(getBaseAddr(), (uint8_t)2);
@@ -46,11 +45,18 @@ uint16_t PbHubDevice::readAnalogVal(uint8_t addr) {
         RegValue_L = Wire.read();
         RegValue_H = Wire.read();
     }
-    USBSerial.printf("data read %u\n", (RegValue_H << 8) | RegValue_L);
     return (RegValue_H << 8) | RegValue_L;
 }
 
 bool PbHubDevice::IfButtonPressed()
 {
-    return (readAnalogVal(buttonHubPortAddr) != 0);
+    uint32_t count = 0;
+
+    while(readAnalogVal(buttonHubPortAddr) != 0)
+    {
+        count++;
+        delay(1);
+    }
+
+    return (count > 0);
 }
