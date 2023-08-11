@@ -35,7 +35,7 @@ void Amg8833::print()
 {
     switchPort();
     gridEye.readPixels(pixels);
-    M5.Lcd.fillScreen(BLACK);
+    M5.Lcd.clear();
     M5.Lcd.setCursor(0,0);
     M5.Lcd.setTextFont(1);
     M5.Lcd.printf("GridEye:\n");
@@ -45,5 +45,5 @@ void Amg8833::print()
                        pixels[i],     pixels[i + 1], pixels[i + 2], pixels[i + 3],
                        pixels[i + 4], pixels[i + 5], pixels[i + 6], pixels[i + 7]);
     }
-    delay(100);
+    delay(50);
 }

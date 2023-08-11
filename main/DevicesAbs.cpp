@@ -5,6 +5,11 @@ bool DeviceAbs::begin()
     return true;
 }
 
+bool DeviceAbs::begin(uint8_t addr)
+{
+    return true;
+}
+
 bool DeviceAbs::restart() 
 {
     return true;

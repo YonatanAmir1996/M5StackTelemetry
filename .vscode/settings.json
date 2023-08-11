@@ -20,5 +20,6 @@
         "new": "cpp",
         "i2cdeviceabs.h": "c",
         "cmath": "cpp"
-    }
+    },
+    "C_Cpp.errorSquiggles": "disabled"
 }
