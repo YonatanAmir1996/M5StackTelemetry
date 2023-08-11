@@ -4,11 +4,16 @@
 
 #include "SharedDefines.h"
 
+#define NUMBER_OF_BEGIN_TRIES 3
+
+
 class DeviceAbs {
     public:
         virtual bool begin();
         virtual void update();
         virtual void print();
+        virtual bool restart();
+        virtual void shutdown();
 
     protected:
         DeviceName_e     deviceName;

@@ -5,5 +5,11 @@ bool DeviceAbs::begin()
     return true;
 }
 
-void DeviceAbs::update() {}
-void DeviceAbs::print()  {}
+bool DeviceAbs::restart() 
+{
+    return true;
+}
+
+void DeviceAbs::update()    {}
+void DeviceAbs::print()     {}
+void DeviceAbs::shutdown()  {}

@@ -19,15 +19,27 @@ ToF::~ToF()
 
 bool ToF::begin()
 {
-    bool canBegin = myImager.begin();
-    if(canBegin)
+    bool    canBegin = false;
+    uint8_t count = 0;
+    
+    while(!canBegin && (count < NUMBER_OF_BEGIN_TRIES))
     {
-        myImager.setResolution(maxRes); //Enable all 64 pads
-        imageResolution = myImager.getResolution(); //Query sensor for current resolution - either 4x4 or 8x8
-        imageWidth = sqrt(imageResolution); //Calculate printing width
-        myImager.startRanging();
+        canBegin = myImager.begin();
+        if(canBegin)
+        {
+            myImager.setResolution(maxRes); //Enable all 64 pads
+            imageResolution = myImager.getResolution(); //Query sensor for current resolution - either 4x4 or 8x8
+            imageWidth = sqrt(imageResolution); //Calculate printing width
+            myImager.startRanging();
+        }
+        else
+        {
+            count++;
+        }
+        delay(100);
     }
-    return canBegin;
+
+    return (count < NUMBER_OF_BEGIN_TRIES);
 }
 
 void ToF::update()
