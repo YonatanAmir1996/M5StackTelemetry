@@ -3,7 +3,13 @@
 
 #include "I2CDeviceAbs.h"
 
-/* Class holds basic methods relevent data to communicate with device by a certain port*/
+#define I2C_FREQ_400KHZ 400000
+#define I2C_FREQ_100KHZ 100000
+/**
+ * @brief PaHubDeviceAbs class.
+ * 
+ * Provides base methods and relevant data to facilitate communication with a device through a specific port.
+ */
 class PaHubDeviceAbs: public I2CDeviceAbs 
 {
     public:

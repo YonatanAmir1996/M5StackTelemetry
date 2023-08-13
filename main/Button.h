@@ -3,6 +3,12 @@
 
 #include "DeviceAbs.h"
 
+
+/**
+ * @class Button
+ * @brief Interface with analog button which connected to PBHUB
+ * @details Interface with analog button which connected to PBHUB.
+ */
 class Button : public DeviceAbs
 {
     public:

@@ -3,98 +3,82 @@
 
 #include <stdint.h>
 
+// Represents a successful I2C end transmission
 #define VALID_I2C_END_TRANSMISSION_VALUE 0
 
-/*Defines Addr*/
-#define VL3L5CX_TOF_I2C_ADDR             0x29
-#define HEART_UNIT_I2C_ADDR              0x57
-#define PB_HUB_I2C_ADDR                  0x61
-#define AMG8833_I2C_ADDR                 0x69
-#define PA_HUB_I2C_ADDR                  0x70
-#define MAX_I2C_ADDR                     0x7F
+// I2C Address Definitions
+#define VL3L5CX_TOF_I2C_ADDR             0x29  // I2C address for VL3L5CX TOF sensor
+#define HEART_UNIT_I2C_ADDR              0x57  // I2C address for heart rate unit
+#define PB_HUB_I2C_ADDR                  0x61  // I2C address for PB hub
+#define AMG8833_I2C_ADDR                 0x69  // I2C address for AMG8833 sensor
+#define PA_HUB_I2C_ADDR                  0x70  // I2C address for PA hub
+#define MAX_I2C_ADDR                     0x7F  // Max I2C address
 
+ // Pin for the RGB on port B
 #define RGB_PORT_B_PIN 9
 
-
+// register address Definitions for PB Hub Ports
 #define PB_HUB_PORT_0_ADDR               0x40
 #define PB_HUB_PORT_1_ADDR               0x50
 #define PB_HUB_PORT_2_ADDR               0x60
 #define PB_HUB_PORT_3_ADDR               0x70
 #define PB_HUB_PORT_4_ADDR               0x80
 #define PB_HUB_PORT_5_ADDR               0xA0
-#define PB_HUB_PORT_INVALID_ADDR         0xFF
+#define PB_HUB_PORT_INVALID_ADDR         0xFF // Invalid address for PB hub port
 
 
 /*Enums*/
+// Enum to define the mode in which the system is running
 typedef enum
 {
-    RUNNING_MODE_STANDALONE,
-    RUNNING_MODE_SLAVE
+    RUNNING_MODE_STANDALONE,  // System operates independently
+    RUNNING_MODE_SLAVE        // System operates as a slave to another device/system
 }RunningMode_e;
 
+// Enum to identify internal and external devices
 typedef enum
 {
-    /* Internal devices mapping */
     DEVICE_START_ALL_DEVICES = 0,
-    DEVICE_START_INTERNAL = DEVICE_START_ALL_DEVICES,
-    DEVICE_IMU = DEVICE_START_INTERNAL,
-    DEVICE_END_INTERNAL,
-    /* External devices mapping PAHUB */
-    DEVICE_START_EXTERNAL_PA_HUB = DEVICE_END_INTERNAL,
-    DEVICE_HEART_UNIT_MAX_30100 = DEVICE_START_EXTERNAL_PA_HUB,
-    DEVICE_AMG8833_GRID_EYE,
-    DEVICE_VL3L5CX_TOF,
-    DEVICE_END_EXTERNAL_PA_HUB,
+    DEVICE_START_INTERNAL = DEVICE_START_ALL_DEVICES, // Starting point for internal devices
+    DEVICE_IMU = DEVICE_START_INTERNAL,  // Internal IMU device
+    DEVICE_END_INTERNAL,                 // Endpoint for internal devices
+    DEVICE_START_EXTERNAL_PA_HUB = DEVICE_END_INTERNAL,  // Starting point for external devices connected to PA HUB
+    DEVICE_HEART_UNIT_MAX_30100 = DEVICE_START_EXTERNAL_PA_HUB, // External heart unit device
+    DEVICE_AMG8833_GRID_EYE,  // External AMG8833 Grid Eye sensor
+    DEVICE_VL3L5CX_TOF,       // External VL3L5CX TOF sensor
+    DEVICE_END_EXTERNAL_PA_HUB,          // Endpoint for external devices on PA HUB
 
-    /* External device mapping PBHUB */
-    DEVICE_START_EXTERNAL_PB_HUB = DEVICE_END_EXTERNAL_PA_HUB,
-    DEVICE_FSR402 = DEVICE_START_EXTERNAL_PB_HUB,
-    DEVICE_BUTTON,      //Don't init in pDevicesHandlers !
-    DEVICE_DC_MOTOR,    //Don't init in pDevicesHandlers !
-    DEVICE_END_EXTERNAL_PB_HUB,
-    
-    /* External device mapping Port B*/
-    DEVICE_START_EXTERNAL_PORT_B = DEVICE_END_EXTERNAL_PB_HUB,
-    DEVICE_RGB_LED = DEVICE_START_EXTERNAL_PORT_B, //Don't init in pDevicesHandlers !
-    DEVICE_END_EXTERNAL_PORT_B,
-    DEVICE_MAX_DEVICES = DEVICE_END_EXTERNAL_PORT_B
+    DEVICE_START_EXTERNAL_PB_HUB = DEVICE_END_EXTERNAL_PA_HUB,  // Starting point for devices on PB HUB
+    DEVICE_FSR402 = DEVICE_START_EXTERNAL_PB_HUB,  // External Force Sensitive Resistor sensor
+    DEVICE_BUTTON,  // External button (Not initialized in device handlers)
+    DEVICE_DC_MOTOR,    // External DC Motor (Not initialized in device handlers)
+    DEVICE_END_EXTERNAL_PB_HUB,          // Endpoint for external devices on PB HUB
+
+    DEVICE_START_EXTERNAL_PORT_B = DEVICE_END_EXTERNAL_PB_HUB,  // Starting point for devices on Port B
+    DEVICE_RGB_LED = DEVICE_START_EXTERNAL_PORT_B, // External RGB LED (Not initialized in device handlers)
+    DEVICE_END_EXTERNAL_PORT_B,          // Endpoint for external devices on Port B
+    DEVICE_MAX_DEVICES = DEVICE_END_EXTERNAL_PORT_B  // Maximum number of supported devices
 }DeviceName_e;
 
+// Enum to specify the ports available on PA HUB
 typedef enum
 {
-    DEVICE_TYPE_START = 0,
-    DEVICE_TYPE_I2C = DEVICE_TYPE_START,
-    DEVICE_TYPE_ANALOG,
-    DEVICE_TYPE_PWM,
-    DEVICE_TYPE_NEO_PIXEL
-}DeviceType_e;
-
-typedef enum
-{
-    CONNECTION_TYPE_INTERNAL = 0,
-    CONNECTION_TYPE_PORT_A,
-    CONNECTION_TYPE_PORT_B,
-    CONNECTION_TYPE_PA_HUB,
-    CONNECTION_TYPE_PB_HUB, 
-}ConnectionType_e;
-
-
-typedef enum
-{
-    PA_HUB_PORT_0 = 0,
-    PA_HUB_PORT_1,
-    PA_HUB_PORT_2,
-    PA_HUB_PORT_3,
-    PA_HUB_PORT_4,
-    PA_HUB_PORT_5,
-    PA_HUB_MAX_PORTS,
-    PA_HUB_INVALID_PORT = 0xFF,
+    PA_HUB_PORT_0 = 0, // Port 0 on PA HUB
+    PA_HUB_PORT_1,     // Port 1 on PA HUB
+    PA_HUB_PORT_2,     // Port 2 on PA HUB
+    PA_HUB_PORT_3,     // Port 3 on PA HUB
+    PA_HUB_PORT_4,     // Port 4 on PA HUB
+    PA_HUB_PORT_5,     // Port 5 on PA HUB
+    PA_HUB_MAX_PORTS,  // Maximum number of ports on PA HUB
+    PA_HUB_INVALID_PORT = 0xFF,  // Invalid port on PA HUB
 }PaHubPort_e;
 
+// Enum to identify commands for PB HUB
 typedef enum
 {
-    PB_HUB_ANALOG_READ = 0x6,
-    PB_HUB_PWM_WRITE   = 0x3
+    PB_HUB_ANALOG_READ = 0x6,  // Command to read analog data from PB HUB
+    PB_HUB_PWM_WRITE   = 0x3   // Command to write PWM data to PB HUB
 }PbHubCommand;
+
 
 #endif

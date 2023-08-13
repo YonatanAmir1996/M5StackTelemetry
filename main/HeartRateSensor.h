@@ -4,6 +4,11 @@
 #include "PaHubDeviceAbs.h"
 #include "MAX30100_PulseOximeter.h"
 
+/**
+ * @class MAX30010
+ * @brief Interface with MAX30010 device(Pulse oximeter sensor)
+ * @details Must be connected to pahub
+ */
 class HeartRateSensor : public PaHubDeviceAbs
 {
     public:
@@ -13,7 +18,6 @@ class HeartRateSensor : public PaHubDeviceAbs
         void print()  override;
         bool restart() override;
         void shutdown();
-        void setFrequency();
 
     private:
         uint32_t      tsLastReport;

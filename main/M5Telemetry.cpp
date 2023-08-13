@@ -2,44 +2,59 @@
 #include "M5Telemetry.h"
 #include "PbHubDevice.h"
 
-M5Telemetry M5Tel; // Extern
+M5Telemetry M5Tel; // Global external instance of M5Telemetry
 
+
+/** 
+ * @brief Default constructor for M5Telemetry.
+ */
 M5Telemetry::M5Telemetry()
 {
 }
 
+/** 
+ * @brief Initialize the M5Telemetry system.
+ * @details This function initializes M5, enabling Port A, LCD, and Serial Connection.
+ */
 void M5Telemetry::begin()
 {
-    // Enable Port A, LCD and SerialConnection
+    // Start M5 initialization with Port A, LCD, and Serial Connection enabled
     M5.begin(true,true,true);
+
+    // Reset all device handlers to NULL
     for (uint8_t i = 0; i < (uint8_t)DEVICE_MAX_DEVICES; i++) 
     {
         pDeviceHandlers[i] = NULL;
     }
 }
 
+/** 
+ * @brief Scan the PaHub to identify which devices are connected.
+ * @details This function maps the connected devices to their corresponding ports on the PaHub.
+ */
 void M5Telemetry::scanPaHub()
 {
+    // Scan the PaHub to identify connected devices
     uint8_t port;
     uint8_t deviceId;
     uint8_t i2cAddr;
 
-    /* Initilizes all port mapping to zero*/
+    // Initilizes all port mapping to zero
     for(uint8_t i2cAddr = 0x1; i2cAddr < PA_HUB_MAX_PORTS; i2cAddr++)
     {
-        i2cAddrToPortMap[i2cAddr] = PA_HUB_INVALID_PORT; // NULL I2C ADDRESS
+        i2cAddrToPortMap[i2cAddr] = PA_HUB_INVALID_PORT; 
     }
 
-    /*Mapping all devices which connected to pahub*/
+    //Mapping all devices which connected to pahub
     for(uint8_t port = static_cast<uint8_t>(PA_HUB_PORT_0); port < static_cast<uint8_t>(PA_HUB_MAX_PORTS); port++)
     {
         i2cAddr = 0x1;
-        // Switching to relevent port
+        // Switching to port
         Wire.beginTransmission(PA_HUB_I2C_ADDR);
         Wire.write(1 << port);
         Wire.endTransmission(); 
 
-        /* Finds which i2c address is connected */
+        // Try determine which i2c are responding
         for(; i2cAddr < MAX_I2C_ADDR; i2cAddr++)
         {
             Wire.beginTransmission(i2cAddr);
@@ -53,11 +68,16 @@ void M5Telemetry::scanPaHub()
     }
 }
 
+/** 
+ * @brief Scan for devices connected to the system and initialize them.
+ * @param buttonHubAddr Address for the button hub.
+ * @param fsrAddr Address for the FSR.
+ * @details This function scans both internal and external devices, initializing and mapping them.
+ */
 void M5Telemetry::scan(uint8_t buttonHubAddr, uint8_t fsrAddr)
 {
     PaHubPort_e        tempPort;
     PaHubDeviceAbs     *pPaHubDeviceHandler;
-    bool                deviceExists;
 
     M5.Lcd.printf("Scanning devices...\n");
 
@@ -72,24 +92,25 @@ void M5Telemetry::scan(uint8_t buttonHubAddr, uint8_t fsrAddr)
 
     // Mapping i2c address to the connect port in pahub
     M5.Lcd.printf("Scanning PaHub Devices...\n");
-    scanPaHub(); 
+    scanPaHub();
 
+    // Try to connect I2C Devices
     for(uint8_t device = (uint8_t)DEVICE_START_EXTERNAL_PA_HUB; device < (uint8_t)DEVICE_END_EXTERNAL_PA_HUB; device++)
     {
         pPaHubDeviceHandler = static_cast<PaHubDeviceAbs*>(pDeviceHandlers[device]);
-        //deviceExists        = false;
+        // Retrieve the port which the I2C device is connected
         tempPort = i2cAddrToPortMap[pPaHubDeviceHandler->getBaseAddr()];
-        USBSerial.printf("i2c addr %02X | PORT %u", pPaHubDeviceHandler->getBaseAddr(), tempPort);
+        //USBSerial.printf("i2c addr %02X | PORT %u\n", pPaHubDeviceHandler->getBaseAddr(), tempPort);
         if(tempPort != PA_HUB_INVALID_PORT)
         {
-            // Sensor was activated therefore can save the port it is connected
-            pPaHubDeviceHandler->setPort(tempPort);
-            pPaHubDeviceHandler->switchPort();
+            pPaHubDeviceHandler->setPort(tempPort); // Set port attribute in pahub
+            pPaHubDeviceHandler->switchPort(); // Actually switch port in PaHub
+
+            /* Try initilize sensor !*/
             if(pPaHubDeviceHandler->begin())
             {
-                pPaHubDeviceHandler->shutdown();
+                pDeviceHandlers[device]->shutdown();
             }
-            else
             {
                 pDeviceHandlers[device] = NULL; // Remove from available devices
             }
@@ -126,20 +147,28 @@ void M5Telemetry::scan(uint8_t buttonHubAddr, uint8_t fsrAddr)
 }
 
 
-// Update all available devices values
+/** 
+ * @brief Update the readings for all available devices.
+ * @details This function iterates over all connected devices and updates their readings.
+ */
 void M5Telemetry::update()
 {
     for(uint8_t device = (uint8_t)DEVICE_START_ALL_DEVICES; device < (uint8_t)DEVICE_MAX_DEVICES; device++)
     {
+        // Determine if device was connected
         if(pDeviceHandlers[device])
         {
-            // Update sensor data
             pDeviceHandlers[device]->update();
         }
     }
 }
 
-void M5Telemetry::standAlonePrint()
+/** 
+ * @brief Standalone print function.
+ * @param standAloneUpdate Flag to determine if update should be standalone(update only the sensor which is printed to screen).
+ * @details Displays sensor data and manages sensor state transitions based on button presses.
+ */
+void M5Telemetry::standAlonePrint(bool standAloneUpdate)
 {
     /* Print to screen and update values for each module*/
     uint8_t state = (DeviceName_e)DEVICE_IMU;
@@ -149,13 +178,29 @@ void M5Telemetry::standAlonePrint()
     {
         state += 1;
     }
+
+    if(!standAloneUpdate)
+    {
+        for(uint8_t device = (uint8_t)DEVICE_START_ALL_DEVICES; device < (uint8_t)DEVICE_MAX_DEVICES; device++)
+        {
+            /* Wakeup relevent sensors*/
+            if(pDeviceHandlers[device])
+            {
+                pDeviceHandlers[device]->restart();
+            }
+        }
+    }
+
     while(1)
     {
         if(button.IfButtonPressed())
         {
-            /* Shutdown sensor prevent I2C issues */
-            static_cast<HeartRateSensor*>(pDeviceHandlers[state])->shutdown();
-
+            
+            if(standAloneUpdate)
+            {
+                /* Shutdown the device which was used */
+                pDeviceHandlers[state]->shutdown();
+            }
             state += 1;
             while(!pDeviceHandlers[state])
             {
@@ -169,17 +214,33 @@ void M5Telemetry::standAlonePrint()
             {
                 state = DEVICE_IMU;
             }
-            pDeviceHandlers[state]->restart();
+
+            if(standAloneUpdate)
+            {
+                /* Wakeup new device */
+                pDeviceHandlers[state]->restart();
+            }
         }
 
         if(pDeviceHandlers[state])
         {
+            if(standAloneUpdate)
+            {
+                pDeviceHandlers[state]->update();
+            }
+            else
+            {
+                update();
+            }
             pDeviceHandlers[state]->print();
         }
     }
-
 }
 
+/** 
+ * @brief Destructor for M5Telemetry.
+ * @details Handles cleanup (if necessary) for the M5Telemetry instance.
+ */
 M5Telemetry::~M5Telemetry()
 {
 }

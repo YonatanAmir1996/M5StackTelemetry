@@ -9,5 +9,5 @@ void setup()
 
 void loop()
 {
-   M5Tel.standAlonePrint(); 
+   M5Tel.standAlonePrint(true); 
 }

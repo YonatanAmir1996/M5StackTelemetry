@@ -1,27 +1,39 @@
 #include "IMU.h"
 #include <M5CoreS3.h>
 
+/**
+ * @brief IMU constructor.
+ * 
+ * Initializes the IMU device attributes.
+ */
 IMU::IMU()
 {
-    deviceName            = DEVICE_IMU;
-    whereCanConnectDevice = CONNECTION_TYPE_INTERNAL;
-    deviceType            = DEVICE_TYPE_I2C;
 }
 
+/**
+ * @brief Initializes the IMU device.
+ * 
+ * @return Returns true after successful initialization.
+ */
 bool IMU::begin()
 {
     M5.IMU.Init(); // Init IMU.               
     return true;
 }
 
+/**
+ * @brief Updates the IMU's data readings.
+ */
 void IMU::update()
 {
     M5.IMU.Update();
 }
 
+/**
+ * @brief Prints the IMU data (gyroscope and accelerometer readings) on the M5's LCD screen.
+ */
 void IMU::print()
 {
-    update();
     M5.Lcd.fillScreen(BLACK);
     M5.Lcd.setCursor(0,0);
     M5.Lcd.setTextFont(2);

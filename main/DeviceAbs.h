@@ -7,6 +7,11 @@
 #define NUMBER_OF_BEGIN_TRIES 3
 
 
+/**
+ * @class DeviceAbs
+ * @brief Abstract base class for all devices.
+ * @details Provides a common interface for all derived device classes.
+ */
 class DeviceAbs {
     public:
         virtual bool begin();
@@ -15,11 +20,7 @@ class DeviceAbs {
         virtual void print();
         virtual bool restart();
         virtual void shutdown();
-
-    protected:
-        DeviceName_e     deviceName;
-        ConnectionType_e whereCanConnectDevice;
-        DeviceType_e     deviceType;
+        void         setFrequency(uint32_t freq);
 };
 
 #endif
