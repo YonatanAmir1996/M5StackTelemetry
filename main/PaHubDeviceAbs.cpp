@@ -45,6 +45,7 @@ PaHubPort_e PaHubDeviceAbs::getPort()
  */
 void PaHubDeviceAbs::switchPort()
 {
+    setFrequency(I2C_FREQ_100KHZ);
     /* Method selects a port to transimition info*/
     Wire.beginTransmission(PA_HUB_I2C_ADDR);
     Wire.write(1 << (uint8_t)connectedPort);

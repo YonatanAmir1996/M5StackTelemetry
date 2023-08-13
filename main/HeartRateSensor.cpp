@@ -41,7 +41,7 @@ bool HeartRateSensor::begin()
 void HeartRateSensor::update()
 {
     switchPort();
-    setFrequency(I2C_BUS_SPEED);
+    setFrequency(I2C_FREQ_400KHZ);
     tsLastReport = millis();
  
     while((millis() - tsLastReport) < REPORTING_PERIOD_MS)
@@ -58,6 +58,7 @@ void HeartRateSensor::shutdown()
 {
     USBSerial.printf("\nShutdown pulse\n");
     switchPort();
+    setFrequency(I2C_FREQ_400KHZ);
     pox.shutdown();
 }
 
@@ -67,8 +68,8 @@ void HeartRateSensor::shutdown()
  */
 bool HeartRateSensor::restart()
 {
-    setFrequency(I2C_FREQ_400KHZ);
     switchPort(); 
+    setFrequency(I2C_FREQ_400KHZ);
     pox.resume();
     return true;
 }
