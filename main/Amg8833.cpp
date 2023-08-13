@@ -31,11 +31,12 @@ bool Amg8833::begin()
 {
     uint8_t count = 0;
 
+    switchPort();
     setFrequency(I2C_FREQ_100KHZ);
     while(!gridEye.begin() && (count < NUMBER_OF_BEGIN_TRIES))
     {
         count++;
-        delay(100);
+        delay(150);
     }
 
     return (count < NUMBER_OF_BEGIN_TRIES);
@@ -47,6 +48,7 @@ bool Amg8833::begin()
  */
 void Amg8833::update()
 {
+    setFrequency(I2C_FREQ_100KHZ);
     switchPort();
     gridEye.readPixels(pixels);
 }
@@ -68,5 +70,5 @@ void Amg8833::print()
                        pixels[i],     pixels[i + 1], pixels[i + 2], pixels[i + 3],
                        pixels[i + 4], pixels[i + 5], pixels[i + 6], pixels[i + 7]);
     }
-    delay(50);
+    delay(100);
 }

@@ -59,7 +59,6 @@ bool ToF::begin()
  */
 void ToF::update()
 {
-    setFrequency(I2C_FREQ_100KHZ);
     switchPort();
     if (myImager.isDataReady())
     {
@@ -94,5 +93,4 @@ void ToF::print()
         M5.Lcd.print("]");
         M5.Lcd.println();
     }
-    delay(100);
 }

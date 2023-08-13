@@ -104,13 +104,14 @@ void M5Telemetry::scan(uint8_t buttonHubAddr, uint8_t fsrAddr)
         if(tempPort != PA_HUB_INVALID_PORT)
         {
             pPaHubDeviceHandler->setPort(tempPort); // Set port attribute in pahub
-            pPaHubDeviceHandler->switchPort(); // Actually switch port in PaHub
 
             /* Try initilize sensor !*/
             if(pPaHubDeviceHandler->begin())
             {
-                pDeviceHandlers[device]->shutdown();
+                M5.Lcd.printf("DeviceId %u identified\n", device);
+                pPaHubDeviceHandler->shutdown();
             }
+            else
             {
                 pDeviceHandlers[device] = NULL; // Remove from available devices
             }
@@ -179,18 +180,6 @@ void M5Telemetry::standAlonePrint(bool standAloneUpdate)
         state += 1;
     }
 
-    if(!standAloneUpdate)
-    {
-        for(uint8_t device = (uint8_t)DEVICE_START_ALL_DEVICES; device < (uint8_t)DEVICE_MAX_DEVICES; device++)
-        {
-            /* Wakeup relevent sensors*/
-            if(pDeviceHandlers[device])
-            {
-                pDeviceHandlers[device]->restart();
-            }
-        }
-    }
-
     while(1)
     {
         if(button.IfButtonPressed())
@@ -201,6 +190,7 @@ void M5Telemetry::standAlonePrint(bool standAloneUpdate)
                 /* Shutdown the device which was used */
                 pDeviceHandlers[state]->shutdown();
             }
+
             state += 1;
             while(!pDeviceHandlers[state])
             {
@@ -210,6 +200,7 @@ void M5Telemetry::standAlonePrint(bool standAloneUpdate)
                     state = DEVICE_IMU;
                 }
             }
+
             if(state == DEVICE_MAX_DEVICES)
             {
                 state = DEVICE_IMU;
@@ -222,18 +213,21 @@ void M5Telemetry::standAlonePrint(bool standAloneUpdate)
             }
         }
 
-        if(pDeviceHandlers[state])
+        if(standAloneUpdate)
         {
-            if(standAloneUpdate)
+            if(pDeviceHandlers[state])
             {
                 pDeviceHandlers[state]->update();
+                pDeviceHandlers[state]->print();
             }
-            else
-            {
-                update();
-            }
+        }
+        else
+        {
+            update();
             pDeviceHandlers[state]->print();
         }
+
+        delay(100);
     }
 }
 

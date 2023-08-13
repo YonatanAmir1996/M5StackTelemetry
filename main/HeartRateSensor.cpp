@@ -8,7 +8,9 @@
  */
 HeartRateSensor::HeartRateSensor() :
 PaHubDeviceAbs(HEART_UNIT_I2C_ADDR),
-tsLastReport(0)
+tsLastReport(0),
+heartRate(0),
+spo2(0)
 {
     
 }
@@ -20,15 +22,17 @@ tsLastReport(0)
 bool HeartRateSensor::begin()
 {
     uint8_t count = 0;
-    bool    ready = pox.begin();
 
-    if (!ready && count < NUMBER_OF_BEGIN_TRIES) 
+    setFrequency(I2C_FREQ_400KHZ);
+    switchPort();
+
+    if (!pox.begin() && (count < NUMBER_OF_BEGIN_TRIES)) 
     {
         count++;
-        delay(100);
-        ready = pox.begin();
+        delay(150);
     }
-    return ready;
+
+    return (count < NUMBER_OF_BEGIN_TRIES);
 }
 
 /**
@@ -40,8 +44,8 @@ bool HeartRateSensor::begin()
  */
 void HeartRateSensor::update()
 {
-    switchPort();
     setFrequency(I2C_FREQ_400KHZ);
+    switchPort();
     tsLastReport = millis();
  
     while((millis() - tsLastReport) < REPORTING_PERIOD_MS)
@@ -49,6 +53,9 @@ void HeartRateSensor::update()
         /* Gather samples*/
         pox.update();
     }
+
+    //heartRate = pox.getHeartRate();
+    //spo2      = pox.getSpO2();
 }
 
 /**
@@ -56,9 +63,8 @@ void HeartRateSensor::update()
  */
 void HeartRateSensor::shutdown()
 {
-    USBSerial.printf("\nShutdown pulse\n");
-    switchPort();
     setFrequency(I2C_FREQ_400KHZ);
+    switchPort();
     pox.shutdown();
 }
 
@@ -79,6 +85,8 @@ bool HeartRateSensor::restart()
  */
 void HeartRateSensor::print()
 {
+    setFrequency(I2C_FREQ_400KHZ);
+    switchPort(); 
     // Asynchronously dump heart rate and oxidation levels to the serial
     // For both, a value of 0 means "invalid"
     M5.Lcd.clear();

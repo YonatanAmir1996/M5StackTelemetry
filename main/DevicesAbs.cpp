@@ -58,5 +58,6 @@ void DeviceAbs::setFrequency(uint32_t freq)
     if(Wire.getClock() != freq)
     {
         Wire.setClock(freq);
+        delay(100);
     }
 }

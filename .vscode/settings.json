@@ -19,7 +19,8 @@
         "random": "cpp",
         "new": "cpp",
         "i2cdeviceabs.h": "c",
-        "cmath": "cpp"
+        "cmath": "cpp",
+        "algorithm": "cpp"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

@@ -31,13 +31,12 @@ bool Button::begin(uint8_t addr)
  */
 bool Button::IfButtonPressed()
 {
-    uint32_t count = 0;
+    bool     retVal = false;
+    uint16_t count = 0;
 
     while(PbHub.readAnalogVal(hubAddr) != 0)
     {
         count++;
-        delay(1);
     }
-
-    return (count > 0);
+    return count > 0;
 }

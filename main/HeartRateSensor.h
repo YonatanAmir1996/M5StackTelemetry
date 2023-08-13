@@ -17,11 +17,13 @@ class HeartRateSensor : public PaHubDeviceAbs
         void update() override;
         void print()  override;
         bool restart() override;
-        void shutdown();
+        void shutdown() override;
 
     private:
         uint32_t      tsLastReport;
         PulseOximeter pox;
+        float         heartRate;
+        uint8_t       spo2;
 };
 
 #endif
