@@ -1,6 +1,8 @@
 #include <M5CoreS3.h>
 #include "M5Telemetry.h"
 #include "PbHubDevice.h"
+#include "RGB.h"
+#include "Vibration.h"
 
 M5Telemetry M5Tel; // Global external instance of M5Telemetry
 
@@ -38,32 +40,36 @@ void M5Telemetry::scanPaHub()
     uint8_t port;
     uint8_t deviceId;
     uint8_t i2cAddr;
-
+    uint8_t retVal;
     // Initilizes all port mapping to zero
-    for(uint8_t i2cAddr = 0x1; i2cAddr < PA_HUB_MAX_PORTS; i2cAddr++)
+    for(uint8_t i2cAddr = 0x1; i2cAddr < MAX_I2C_ADDR; i2cAddr++)
     {
         i2cAddrToPortMap[i2cAddr] = PA_HUB_INVALID_PORT; 
     }
 
-    //Mapping all devices which connected to pahub
+    // Mapping all devices which connected to pahub
     for(uint8_t port = static_cast<uint8_t>(PA_HUB_PORT_0); port < static_cast<uint8_t>(PA_HUB_MAX_PORTS); port++)
     {
         i2cAddr = 0x1;
         // Switching to port
         Wire.beginTransmission(PA_HUB_I2C_ADDR);
         Wire.write(1 << port);
-        Wire.endTransmission(); 
+        retVal = Wire.endTransmission();
+        delay(200);
 
-        // Try determine which i2c are responding
-        for(; i2cAddr < MAX_I2C_ADDR; i2cAddr++)
+        if(VALID_I2C_END_TRANSMISSION_VALUE == retVal)
         {
-            Wire.beginTransmission(i2cAddr);
-            if((Wire.endTransmission() == VALID_I2C_END_TRANSMISSION_VALUE) && (PA_HUB_I2C_ADDR != i2cAddr))
+            // Try determine which i2c are responding
+            for(; i2cAddr < MAX_I2C_ADDR; i2cAddr++)
             {
-                // Saving in map the device found in pahub.
-                i2cAddrToPortMap[i2cAddr] = static_cast<PaHubPort_e>(port);
+                Wire.beginTransmission(i2cAddr);
+                if((Wire.endTransmission() == VALID_I2C_END_TRANSMISSION_VALUE) && (PA_HUB_I2C_ADDR != i2cAddr) 
+                    && (PA_HUB_I2C_ADDR2 != i2cAddr))
+                {
+                    // Saving in map the device found in pahub.
+                    i2cAddrToPortMap[i2cAddr] = static_cast<PaHubPort_e>(port);
+                }
             }
-            delay(1);
         }
     }
 }
@@ -72,9 +78,10 @@ void M5Telemetry::scanPaHub()
  * @brief Scan for devices connected to the system and initialize them.
  * @param buttonHubAddr Address for the button hub.
  * @param fsrAddr Address for the FSR.
+ * @param useRgb flag if use RGB device
  * @details This function scans both internal and external devices, initializing and mapping them.
  */
-void M5Telemetry::scan(uint8_t buttonHubAddr, uint8_t fsrAddr)
+void M5Telemetry::scan(uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibrationMotorAddress, bool useRgb)
 {
     PaHubPort_e        tempPort;
     PaHubDeviceAbs     *pPaHubDeviceHandler;
@@ -100,19 +107,22 @@ void M5Telemetry::scan(uint8_t buttonHubAddr, uint8_t fsrAddr)
         pPaHubDeviceHandler = static_cast<PaHubDeviceAbs*>(pDeviceHandlers[device]);
         // Retrieve the port which the I2C device is connected
         tempPort = i2cAddrToPortMap[pPaHubDeviceHandler->getBaseAddr()];
-        //USBSerial.printf("i2c addr %02X | PORT %u\n", pPaHubDeviceHandler->getBaseAddr(), tempPort);
         if(tempPort != PA_HUB_INVALID_PORT)
         {
+           // USBSerial.printf("i2c addr %02X | PORT %u\n", pPaHubDeviceHandler->getBaseAddr(), tempPort);
             pPaHubDeviceHandler->setPort(tempPort); // Set port attribute in pahub
 
             /* Try initilize sensor !*/
             if(pPaHubDeviceHandler->begin())
             {
                 M5.Lcd.printf("DeviceId %u identified\n", device);
+                USBSerial.printf("DeviceId %u identified\n", device);
                 pPaHubDeviceHandler->shutdown();
             }
             else
             {
+                M5.Lcd.printf("Failed to active DeviceId %u\n", device);
+                USBSerial.printf("Failed to active DeviceId %u\n", device);
                 pDeviceHandlers[device] = NULL; // Remove from available devices
             }
         }
@@ -128,8 +138,8 @@ void M5Telemetry::scan(uint8_t buttonHubAddr, uint8_t fsrAddr)
 
     pDeviceHandlers[DEVICE_FSR402] = static_cast<DeviceAbs*>(&fsr);
 
-    // Sensors
-    if(fsrAddr != PB_HUB_PORT_INVALID_ADDR)
+    // Sensors / Devices
+    if(PB_HUB_PORT_INVALID_ADDR != fsrAddr)
     {
         fsr.begin(fsrAddr);
     }
@@ -142,9 +152,18 @@ void M5Telemetry::scan(uint8_t buttonHubAddr, uint8_t fsrAddr)
     }
     button.begin(buttonHubAddr); 
 
-
-    // PORT B handling
-    
+    // Outputs
+    if (useRgb)
+    {
+        // PORT B
+        RGBDevice.begin();
+    }
+    if (PB_HUB_PORT_INVALID_ADDR != vibrationMotorAddress)
+    {
+        // PB-HUB
+        vibrationMotor.begin(vibrationMotorAddress);
+    }
+    delay(2500);
 }
 
 

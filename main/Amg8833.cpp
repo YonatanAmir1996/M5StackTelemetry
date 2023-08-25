@@ -33,10 +33,17 @@ bool Amg8833::begin()
 
     switchPort();
     setFrequency(I2C_FREQ_100KHZ);
-    while(!gridEye.begin() && (count < NUMBER_OF_BEGIN_TRIES))
+    while(count < NUMBER_OF_BEGIN_TRIES)
     {
-        count++;
-        delay(150);
+      if(gridEye.begin())
+      {
+          break;
+      }
+      else
+      {
+          count++;
+          delay(150);
+      }
     }
 
     return (count < NUMBER_OF_BEGIN_TRIES);

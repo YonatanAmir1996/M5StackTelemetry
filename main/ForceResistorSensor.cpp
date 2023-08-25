@@ -1,12 +1,17 @@
 #include "ForceResistorSensor.h"
 #include "PbHubDevice.h"
+#include "RGB.h"
+#include "Vibration.h"
+
+#define FSR_THRESHOLD 1000
 
 /**
  * @brief Default constructor. Initializes the hub address and FSR value to zero.
  */
 ForceResistorSensor::ForceResistorSensor() :
-hubAddr(0),
-fsrValue(0)
+hubAddr(PB_HUB_PORT_INVALID_ADDR),
+fsrValue(0),
+outputWasSet(false)
 {
 }
 
@@ -27,6 +32,22 @@ bool ForceResistorSensor::begin(uint8_t addr)
 void ForceResistorSensor::update()
 {
     fsrValue = PbHub.readAnalogVal(hubAddr);
+    if(!outputWasSet && (fsrValue > FSR_THRESHOLD))
+    {
+        RGBDevice.SetRGB(0, 0, 100, 0);
+        RGBDevice.SetRGB(1, 0, 100, 0);
+        RGBDevice.SetRGB(2, 0, 100, 0);
+        vibrationMotor.setMotor(50);
+        outputWasSet = true;
+    }
+    else if(outputWasSet && (fsrValue < FSR_THRESHOLD))
+    {
+        RGBDevice.SetRGB(0, 0, 0, 0);
+        RGBDevice.SetRGB(1, 0, 0, 0);
+        RGBDevice.SetRGB(2, 0, 0, 0);
+        vibrationMotor.setMotor(0);
+        outputWasSet = false;
+    }
 }
 
 /**
