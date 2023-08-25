@@ -26,13 +26,7 @@ bool HeartRateSensor::begin()
     setFrequency(I2C_FREQ_400KHZ);
     switchPort();
 
-    if (!pox.begin() && (count < NUMBER_OF_BEGIN_TRIES)) 
-    {
-        count++;
-        delay(150);
-    }
-
-    return (count < NUMBER_OF_BEGIN_TRIES);
+    return pox.begin();
 }
 
 /**

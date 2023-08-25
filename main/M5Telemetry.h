@@ -16,7 +16,7 @@ class M5Telemetry
         ~M5Telemetry(); 
         void begin(); 
         void standAlonePrint(bool standAloneUpdate);
-        void scan(uint8_t buttonHubAddr, uint8_t fsrAddr);
+        void scan(uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibrationMotorAddress, bool useRgb);
         void update();
         void scanPaHub();
     public:

@@ -30,26 +30,25 @@ ToF::~ToF()
  */
 bool ToF::begin()
 {
-    bool    canBegin = false;
     uint8_t count = 0;
 
     setFrequency(I2C_FREQ_100KHZ);
     
-    while(!canBegin && (count < NUMBER_OF_BEGIN_TRIES))
+    while(count < NUMBER_OF_BEGIN_TRIES)
     {
-        canBegin = myImager.begin();
-        if(canBegin)
+        if(myImager.begin())
         {
             myImager.setResolution(maxRes); //Enable all 64 pads
             imageResolution = myImager.getResolution(); //Query sensor for current resolution - either 4x4 or 8x8
             imageWidth = sqrt(imageResolution); //Calculate printing width
             myImager.startRanging();
+            break;
         }
         else
         {
             count++;
+            delay(100);
         }
-        delay(100);
     }
     return (count < NUMBER_OF_BEGIN_TRIES);
 }

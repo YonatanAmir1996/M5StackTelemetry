@@ -12,6 +12,7 @@
 #define PB_HUB_I2C_ADDR                  0x61  // I2C address for PB hub
 #define AMG8833_I2C_ADDR                 0x69  // I2C address for AMG8833 sensor
 #define PA_HUB_I2C_ADDR                  0x70  // I2C address for PA hub
+#define PA_HUB_I2C_ADDR2                 0x75  // I2C address for PA hub
 #define MAX_I2C_ADDR                     0x7F  // Max I2C address
 
  // Pin for the RGB on port B
@@ -50,12 +51,9 @@ typedef enum
 
     DEVICE_START_EXTERNAL_PB_HUB = DEVICE_END_EXTERNAL_PA_HUB,  // Starting point for devices on PB HUB
     DEVICE_FSR402 = DEVICE_START_EXTERNAL_PB_HUB,  // External Force Sensitive Resistor sensor
-    DEVICE_BUTTON,  // External button (Not initialized in device handlers)
-    DEVICE_DC_MOTOR,    // External DC Motor (Not initialized in device handlers)
     DEVICE_END_EXTERNAL_PB_HUB,          // Endpoint for external devices on PB HUB
 
     DEVICE_START_EXTERNAL_PORT_B = DEVICE_END_EXTERNAL_PB_HUB,  // Starting point for devices on Port B
-    DEVICE_RGB_LED = DEVICE_START_EXTERNAL_PORT_B, // External RGB LED (Not initialized in device handlers)
     DEVICE_END_EXTERNAL_PORT_B,          // Endpoint for external devices on Port B
     DEVICE_MAX_DEVICES = DEVICE_END_EXTERNAL_PORT_B  // Maximum number of supported devices
 }DeviceName_e;

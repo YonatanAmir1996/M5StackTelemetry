@@ -28,22 +28,36 @@ bool PbHubDevice::begin()
     return true;
 }
 
-uint16_t PbHubDevice::readAnalogVal(uint8_t addr) {
+uint16_t PbHubDevice::readAnalogVal(uint8_t addr) 
+{
     uint8_t RegValue_L = 0;
     uint8_t RegValue_H = 0;
     uint8_t error;
 
-    switchPort();
-    Wire.beginTransmission(getBaseAddr());
-    Wire.write(addr | 0x06);
-    error = Wire.endTransmission();
-
-    
-
-    Wire.requestFrom(getBaseAddr(), (uint8_t)2);
-    while (Wire.available()) {
-        RegValue_L = Wire.read();
-        RegValue_H = Wire.read();
+    if (PB_HUB_PORT_INVALID_ADDR != addr)
+    {
+        switchPort();
+        Wire.beginTransmission(getBaseAddr());
+        Wire.write(addr | 0x06);
+        error = Wire.endTransmission();
+        Wire.requestFrom(getBaseAddr(), (uint8_t)2);
+        while (Wire.available()) 
+        {
+            RegValue_L = Wire.read();
+            RegValue_H = Wire.read();
+        }
     }
     return (RegValue_H << 8) | RegValue_L;
+}
+
+void PbHubDevice::setPwm(uint8_t addr, uint8_t dutyCycle)
+{
+    switchPort();
+    if (PB_HUB_PORT_INVALID_ADDR != addr)
+    {
+        Wire.beginTransmission(getBaseAddr());
+        Wire.write(addr | 0x03);
+        Wire.write(dutyCycle & 0xff);
+        Wire.endTransmission();
+    }
 }

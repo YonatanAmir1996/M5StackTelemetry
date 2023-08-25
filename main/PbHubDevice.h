@@ -9,6 +9,7 @@ class PbHubDevice: public PaHubDeviceAbs
         ~PbHubDevice();
         bool begin() override;
         uint16_t readAnalogVal(uint8_t addr);
+        void setPwm(uint8_t addr, uint8_t dutyCycle);
 };
 
 extern PbHubDevice PbHub;

@@ -21,6 +21,7 @@ class ForceResistorSensor : public DeviceAbs
     private:
         uint8_t  hubAddr;
         uint16_t fsrValue;
+        bool     outputWasSet;
 };
 
 #endif
