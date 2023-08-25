@@ -3,67 +3,90 @@
 
 #define REPORTING_PERIOD_MS 2000
 
+/**
+ * @brief Default constructor. Initializes the heart rate sensor with default I2C address and resets timestamp of last report.
+ */
 HeartRateSensor::HeartRateSensor() :
 PaHubDeviceAbs(HEART_UNIT_I2C_ADDR),
-tsLastReport(0)
+tsLastReport(0),
+heartRate(0),
+spo2(0)
 {
     
 }
 
+/**
+ * @brief Initializes the HeartRateSensor. Tries to begin the sensor multiple times if the first attempt fails.
+ * @return Returns true if the sensor initialization was successful, false otherwise.
+ */
 bool HeartRateSensor::begin()
 {
     uint8_t count = 0;
-    bool    ready = pox.begin();
 
-    if (!ready && count < NUMBER_OF_BEGIN_TRIES) 
+    setFrequency(I2C_FREQ_400KHZ);
+    switchPort();
+
+    if (!pox.begin() && (count < NUMBER_OF_BEGIN_TRIES)) 
     {
         count++;
-        delay(100);
-        ready = pox.begin();
+        delay(150);
     }
-    return ready;
+
+    return (count < NUMBER_OF_BEGIN_TRIES);
 }
 
+/**
+ * @brief Gathers samples from the PulseOximeter for a specified duration (REPORTING_PERIOD_MS).
+ * 
+ * The PulseOximeter requires some time to accumulate accurate readings, so samples are taken over
+ * a 2-second duration to ensure the readings' reliability and consistency. Making sure to continuously
+ * call `pox.update()` helps in accurate tracking and data collection.
+ */
 void HeartRateSensor::update()
 {
+    setFrequency(I2C_FREQ_400KHZ);
     switchPort();
-    setFrequency();
     tsLastReport = millis();
-
-    /* Gather samples*/
+ 
     while((millis() - tsLastReport) < REPORTING_PERIOD_MS)
     {
-    // Make sure to call update as fast as possible
+        /* Gather samples*/
         pox.update();
     }
+
+    //heartRate = pox.getHeartRate();
+    //spo2      = pox.getSpO2();
 }
 
+/**
+ * @brief Shuts down the HeartRateSensor and outputs a shutdown message to USB serial.
+ */
 void HeartRateSensor::shutdown()
 {
-    USBSerial.printf("\nShutdown pulse\n");
+    setFrequency(I2C_FREQ_400KHZ);
     switchPort();
-    setFrequency();
     pox.shutdown();
 }
-void HeartRateSensor::setFrequency()
-{
-    if(Wire.getClock() != I2C_BUS_SPEED)
-    {
-        Wire.setClock(I2C_BUS_SPEED);
-        delay(100);
-    }
-}
+
+/**
+ * @brief Restarts the HeartRateSensor.
+ * @return Always returns true. Might need additional implementation details for error checking.
+ */
 bool HeartRateSensor::restart()
 {
-    switchPort();
-    setFrequency();
+    switchPort(); 
+    setFrequency(I2C_FREQ_400KHZ);
     pox.resume();
     return true;
 }
 
+/**
+ * @brief Displays the current heart rate and SpO2 readings on the M5 LCD.
+ */
 void HeartRateSensor::print()
 {
-    update();
+    setFrequency(I2C_FREQ_400KHZ);
+    switchPort(); 
     // Asynchronously dump heart rate and oxidation levels to the serial
     // For both, a value of 0 means "invalid"
     M5.Lcd.clear();

@@ -3,6 +3,12 @@
 
 #define TOF_MAX_ARRAY_SIZE 64
 
+
+/**
+ * @brief Default constructor for the ToF class.
+ *
+ * Initializes image width, resolution, and sets the maximum resolution for the ToF sensor.
+ */
 ToF::ToF() :
 imageWidth(0),
 imageResolution(0),
@@ -17,10 +23,17 @@ ToF::~ToF()
 
 }
 
+ 
+/**
+ * @brief Initialize the ToF sensor.
+ * @return Returns true if initialization was successful, false otherwise.
+ */
 bool ToF::begin()
 {
     bool    canBegin = false;
     uint8_t count = 0;
+
+    setFrequency(I2C_FREQ_100KHZ);
     
     while(!canBegin && (count < NUMBER_OF_BEGIN_TRIES))
     {
@@ -38,10 +51,12 @@ bool ToF::begin()
         }
         delay(100);
     }
-
     return (count < NUMBER_OF_BEGIN_TRIES);
 }
 
+/**
+ * @brief Update the ToF readings.
+ */
 void ToF::update()
 {
     switchPort();
@@ -52,11 +67,13 @@ void ToF::update()
 }
 
 
+/**
+ * @brief Display the ToF readings.
+ * 
+ * This method prints the ToF data to the M5 LCD in a structured format.
+ */
 void ToF::print()
 {
-    switchPort();
-    update();
-
     M5.Lcd.clear();
     M5.Lcd.setCursor(0,0);
     M5.Lcd.setTextFont(2);
@@ -76,5 +93,4 @@ void ToF::print()
         M5.Lcd.print("]");
         M5.Lcd.println();
     }
-    delay(100);
 }

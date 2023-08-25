@@ -4,6 +4,11 @@
 #include <SparkFun_VL53L5CX_Library.h> 
 #include "PaHubDeviceAbs.h"
 
+/**
+ * @brief Time-of-Flight (ToF) Sensor Class.
+ * 
+ * This class provides methods to interface with the ToF sensor, fetch data, and display the readings.
+ */
 class ToF: public PaHubDeviceAbs
 {
     public:
@@ -14,11 +19,11 @@ class ToF: public PaHubDeviceAbs
         void print();
 
     private:    
-        SparkFun_VL53L5CX    myImager;
-        VL53L5CX_ResultsData measurementData; // Result data class structure, 1356 byes of RAM
-        uint32_t             imageResolution; //Used to pretty print output
-        uint32_t             imageWidth;      //Used to pretty print output
-        uint8_t              maxRes;
+        SparkFun_VL53L5CX    myImager;               // Instance of the SparkFun VL53L5CX library for interfacing with the ToF sensor
+        VL53L5CX_ResultsData measurementData;        // Structure to hold ranging result data
+        uint32_t             imageResolution;        // Holds the current image resolution
+        uint32_t             imageWidth;             // Width of the image used for printing
+        uint8_t              maxRes;                 // Maximum resolution constant
 };
 
 #endif

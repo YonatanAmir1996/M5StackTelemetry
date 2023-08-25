@@ -15,7 +15,7 @@ class M5Telemetry
         M5Telemetry();
         ~M5Telemetry(); 
         void begin(); 
-        void standAlonePrint();
+        void standAlonePrint(bool standAloneUpdate);
         void scan(uint8_t buttonHubAddr, uint8_t fsrAddr);
         void update();
         void scanPaHub();

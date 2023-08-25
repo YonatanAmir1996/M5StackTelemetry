@@ -4,6 +4,11 @@
 #include <M5CoreS3.h>
 #include "DeviceAbs.h"
 
+/**
+ * @class ForceResistorSensor
+ * @brief FSR-402 Interface
+ * @details Must be connected to pbhub
+ */
 class ForceResistorSensor : public DeviceAbs
 {
 

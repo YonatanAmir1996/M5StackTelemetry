@@ -4,6 +4,12 @@
 #include <Adafruit_AMG88xx.h>
 #include "PaHubDeviceAbs.h"
 
+
+/**
+ * @class Amg8833
+ * @brief Interface with amg8833 device(thermal camera)
+ * @details Must be connected to pahub
+ */
 class Amg8833: public PaHubDeviceAbs
 {
     public:
