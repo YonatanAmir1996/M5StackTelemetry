@@ -32,11 +32,18 @@
 // Enum to define the mode in which the system is running
 typedef enum
 {
-    RUNNING_MODE_STANDALONE,  // System operates independently
-    RUNNING_MODE_SLAVE        // System operates as a slave to another device/system
-}RunningMode_e;
+    RUNNING_MODE_START = 0,
+        // System operates as a slave to another device/system
+    RUNNING_MODE_SLAVE_START = RUNNING_MODE_START,
+    RUNNING_MODE_SERIAL = RUNNING_MODE_SLAVE_START,
+    RUNNING_MODE_WIFI,
+    RUNNING_MODE_SLAVE_END = RUNNING_MODE_WIFI,
+    // System operates independently
+    RUNNING_MODE_STANDALONE,
+    RUNNING_MODE_END, 
+} RunningMode_e;
 
-// Enum to identify internal and external devices
+// Enum to identify internal and external devices. Please set only devices which are used as sensors !
 typedef enum
 {
     DEVICE_START_ALL_DEVICES = 0,
@@ -54,9 +61,10 @@ typedef enum
     DEVICE_END_EXTERNAL_PB_HUB,          // Endpoint for external devices on PB HUB
 
     DEVICE_START_EXTERNAL_PORT_B = DEVICE_END_EXTERNAL_PB_HUB,  // Starting point for devices on Port B
-    DEVICE_END_EXTERNAL_PORT_B,          // Endpoint for external devices on Port B
+    DEVICE_END_EXTERNAL_PORT_B = DEVICE_START_EXTERNAL_PORT_B,  // Endpoint for external devices on Port B
     DEVICE_MAX_DEVICES = DEVICE_END_EXTERNAL_PORT_B  // Maximum number of supported devices
-}DeviceName_e;
+} DeviceName_e;
+
 
 // Enum to specify the ports available on PA HUB
 typedef enum
@@ -69,14 +77,24 @@ typedef enum
     PA_HUB_PORT_5,     // Port 5 on PA HUB
     PA_HUB_MAX_PORTS,  // Maximum number of ports on PA HUB
     PA_HUB_INVALID_PORT = 0xFF,  // Invalid port on PA HUB
-}PaHubPort_e;
+} PaHubPort_e;
 
 // Enum to identify commands for PB HUB
 typedef enum
 {
     PB_HUB_ANALOG_READ = 0x6,  // Command to read analog data from PB HUB
     PB_HUB_PWM_WRITE   = 0x3   // Command to write PWM data to PB HUB
-}PbHubCommand;
+} PbHubCommand_e;
 
+
+typedef enum
+{
+    COMMAND_START = 0,
+    COMMAND_SHOW_USAGE = COMMAND_START,
+    COMMAND_RUN,
+    COMMAND_RESCAN,
+    COMMAND_END,
+    COMMAND_INVALID = 0xFF
+} Commands_e;
 
 #endif

@@ -19,6 +19,9 @@ class M5Telemetry
         void scan(uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibrationMotorAddress, bool useRgb);
         void update();
         void scanPaHub();
+        void run(bool forceStandAlone, uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibrationMotorAddress, bool useRgb);
+        static void thread(void* pvParameters);
+
     public:
         RunningMode_e       runningMode;  
 
@@ -31,6 +34,7 @@ class M5Telemetry
         PaHubPort_e         i2cAddrToPortMap[MAX_I2C_ADDR]; // Mapping between I2C address to the port it is connected
         Button              button;
         ForceResistorSensor fsr;
+        uint32_t            supportedBitmap;
 };
 
 extern M5Telemetry M5Tel;
