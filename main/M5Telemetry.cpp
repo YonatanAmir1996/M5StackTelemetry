@@ -76,9 +76,10 @@ void M5Telemetry::scanPaHub()
 
 /** 
  * @brief Scan for devices connected to the system and initialize them.
- * @param buttonHubAddr Address for the button hub.
- * @param fsrAddr Address for the FSR.
- * @param useRgb flag if use RGB device
+ * @param buttonHubAddr PBHUB Address for the button hub.
+ * @param fsrAddr PBHUB Address for the FSR.
+ * @param vibrationMotorAddress PBHUB address for vibration motor
+ * @param useRgb flag if use RGB device.
  * @details This function scans both internal and external devices, initializing and mapping them.
  */
 void M5Telemetry::scan(uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibrationMotorAddress, bool useRgb)
