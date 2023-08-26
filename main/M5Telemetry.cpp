@@ -109,20 +109,20 @@ void M5Telemetry::scan(uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibration
         tempPort = i2cAddrToPortMap[pPaHubDeviceHandler->getBaseAddr()];
         if(tempPort != PA_HUB_INVALID_PORT)
         {
-           // USBSerial.printf("i2c addr %02X | PORT %u\n", pPaHubDeviceHandler->getBaseAddr(), tempPort);
+            // USBSerial.printf("i2c addr %02X | PORT %u\n", pPaHubDeviceHandler->getBaseAddr(), tempPort);
             pPaHubDeviceHandler->setPort(tempPort); // Set port attribute in pahub
 
             /* Try initilize sensor !*/
             if(pPaHubDeviceHandler->begin())
             {
                 M5.Lcd.printf("DeviceId %u identified\n", device);
-                USBSerial.printf("DeviceId %u identified\n", device);
+                // USBSerial.printf("DeviceId %u identified\n", device);
                 pPaHubDeviceHandler->shutdown();
             }
             else
             {
                 M5.Lcd.printf("Failed to active DeviceId %u\n", device);
-                USBSerial.printf("Failed to active DeviceId %u\n", device);
+                // USBSerial.printf("Failed to active DeviceId %u\n", device);
                 pDeviceHandlers[device] = NULL; // Remove from available devices
             }
         }
