@@ -3,16 +3,20 @@
 #include "PbHubDevice.h"
 #include "RGB.h"
 #include "Vibration.h"
+#include "CommandHandler.h"
 
 M5Telemetry M5Tel; // Global external instance of M5Telemetry
-
 
 /** 
  * @brief Default constructor for M5Telemetry.
  */
-M5Telemetry::M5Telemetry()
-{
-}
+M5Telemetry::M5Telemetry() {}
+
+/** 
+ * @brief Destructor for M5Telemetry.
+ * @details Handles cleanup (if necessary) for the M5Telemetry instance.
+ */
+M5Telemetry::~M5Telemetry() {}
 
 /** 
  * @brief Initialize the M5Telemetry system.
@@ -24,10 +28,15 @@ void M5Telemetry::begin()
     M5.begin(true,true,true);
 
     // Reset all device handlers to NULL
+    supportedBitmap = 0x0;
     for (uint8_t i = 0; i < (uint8_t)DEVICE_MAX_DEVICES; i++) 
     {
         pDeviceHandlers[i] = NULL;
+        supportedBitmap    |= (1 << i);
     }
+
+    // CLI handler begin
+    commandHandler.begin();
 }
 
 /** 
@@ -41,6 +50,7 @@ void M5Telemetry::scanPaHub()
     uint8_t deviceId;
     uint8_t i2cAddr;
     uint8_t retVal;
+
     // Initilizes all port mapping to zero
     for(uint8_t i2cAddr = 0x1; i2cAddr < MAX_I2C_ADDR; i2cAddr++)
     {
@@ -75,7 +85,7 @@ void M5Telemetry::scanPaHub()
 }
 
 /** 
- * @brief Scan for devices connected to the system and initialize them.
+ * @brief Scan for devices connected to the system and initialize them(In case of standalone)
  * @param buttonHubAddr PBHUB Address for the button hub.
  * @param fsrAddr PBHUB Address for the FSR.
  * @param vibrationMotorAddress PBHUB address for vibration motor
@@ -116,7 +126,7 @@ void M5Telemetry::scan(uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibration
             /* Try initilize sensor !*/
             if(pPaHubDeviceHandler->begin())
             {
-                M5.Lcd.printf("DeviceId %u identified\n", device);
+                M5.Lcd.printf("DeviceId %u initialized\n", device);
                 // USBSerial.printf("DeviceId %u identified\n", device);
                 pPaHubDeviceHandler->shutdown();
             }
@@ -143,6 +153,7 @@ void M5Telemetry::scan(uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibration
     if(PB_HUB_PORT_INVALID_ADDR != fsrAddr)
     {
         fsr.begin(fsrAddr);
+        M5.Lcd.println("FSR initialized");
     }
 
     // internal devices (interrupt / lcd handling etc...)
@@ -151,16 +162,20 @@ void M5Telemetry::scan(uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibration
         M5.Lcd.printf("Button must be set!\n Reset Device.");
         while(1) {};
     }
+    M5.Lcd.println("Button initialized");
     button.begin(buttonHubAddr); 
 
     // Outputs
     if (useRgb)
     {
+        M5.Lcd.println("RGB initialized");
         // PORT B
         RGBDevice.begin();
     }
+
     if (PB_HUB_PORT_INVALID_ADDR != vibrationMotorAddress)
     {
+        M5.Lcd.println("Vibration motor initialized");
         // PB-HUB
         vibrationMotor.begin(vibrationMotorAddress);
     }
@@ -185,8 +200,8 @@ void M5Telemetry::update()
 }
 
 /** 
- * @brief Standalone print function.
- * @param standAloneUpdate Flag to determine if update should be standalone(update only the sensor which is printed to screen).
+ * @brief Standalone run function.
+ * @param standAloneUpdate Flag to determine if update should be standalone(update only the sensor which is printed to screen), used for debug purposes a single device.
  * @details Displays sensor data and manages sensor state transitions based on button presses.
  */
 void M5Telemetry::standAlonePrint(bool standAloneUpdate)
@@ -251,10 +266,43 @@ void M5Telemetry::standAlonePrint(bool standAloneUpdate)
     }
 }
 
-/** 
- * @brief Destructor for M5Telemetry.
- * @details Handles cleanup (if necessary) for the M5Telemetry instance.
- */
-M5Telemetry::~M5Telemetry()
+void M5Telemetry::run(bool forceStandAlone, uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibrationMotorAddress, bool useRgb)
 {
+    if((false == forceStandAlone) && (true == commandHandler.isConnected()))
+    {
+        xTaskCreatePinnedToCore(
+            M5Telemetry::thread,
+            "commandHandler",
+            4096,   // The size of the task stack specified as the number of (in bytes)
+            NULL,   // Pointer that will be used as the parameter for the task being created.
+            2,      // Priority of the task
+            NULL,   // Task handler
+            0       // Core where the task should run.
+        );
+
+        /* Main handler */
+        M5.Lcd.println("Pending for master command");
+        while(1)
+        {
+            /* Flag which means command is ready to get parsed*/
+            while(!commandHandler.isCommandReady())
+            {
+                delay(1);
+            }
+        }
+    }
+    else
+    {
+        M5Tel.scan(buttonHubAddr, fsrAddr, vibrationMotorAddress, useRgb);
+        M5Tel.standAlonePrint(false); 
+    }
+}
+
+/** 
+ * @brief thread handler
+ * @details Static attribute to run command handler in thread(must be a static method)
+ */
+void M5Telemetry::thread(void* pvParameters)
+{
+    commandHandler.run();
 }

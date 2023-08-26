@@ -4,10 +4,16 @@
 void setup()
 {
     M5Tel.begin();
-    M5Tel.scan(PB_HUB_PORT_0_ADDR, PB_HUB_PORT_1_ADDR, PB_HUB_PORT_3_ADDR, true);
 }
 
 void loop()
 {
-   M5Tel.standAlonePrint(false); 
+    M5Tel.run(
+        false,              // Force standalone flag
+        /* Standalone parameters in case of force standalone / failure connect to RASPBERRY PI*/
+        PB_HUB_PORT_0_ADDR, // Button PbHub address
+        PB_HUB_PORT_1_ADDR, // FSR PbHub address
+        PB_HUB_PORT_3_ADDR, // Vibration Motor PbHub address
+        true                // use RGB device(Supported only in PORT B)
+        );
 }
