@@ -39,18 +39,11 @@ class CommandHandler
         typedef void (CommandHandler::*CallbackCommandFunction)(String);
 
         void        runSerialMode();     
-        Commands_e  getCommandName(String command);   
-        void        ArgsParser(const String &command, ArgumentParser_t *argsStruct); 
-        Arguments_t parseKeyValue(const String &item); 
-        bool        isInteger(String input);
-
-        /* Commands */
-        void       commandShowUsage(String command);
-        void       commandRun(String command);
+        void        commandRun(String command);
 
     private:
         RunningMode_e           connectionType;
-        CallbackCommandFunction LookupTable[COMMAND_END];
+        CallbackCommandFunction LookupTable[COMMAND_MAX_COMMANDS];
 };
 
 extern CommandHandler commandHandler;
