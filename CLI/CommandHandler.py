@@ -1,5 +1,8 @@
 import enum
 import struct
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from SerialHandler import SerialHandler
 
 
@@ -11,11 +14,9 @@ class Commands(enum.IntEnum):
 
 class CommandHandler:
     invalid_pb_hub_port = 0xFF
+
     def __init__(self):
-        self.__handler = None
-        for handler in [SerialHandler()]:
-            if handler.connect():
-                self.__handler = handler
+        self.__handler = SerialHandler()
 
         if self.__handler is None:
             raise ConnectionError("Couldn't connect to M5Stack")
@@ -39,20 +40,18 @@ class CommandHandler:
         """
         # Writes how many bytes should be read -> (command) + (4*args) bytes
         total_bytes = 4 + (len(args) << 2)
-        self.__handler.write(f"{total_bytes:08X}".upper())
-
         # 4 bytes for command name
         raw_data = struct.pack(">I", command.value)
 
         # Convert and append each argument
         for arg in args:
             raw_data += struct.pack(">I", arg)
-        self.__handler.write(raw_data.hex().upper())
 
-
-CommandHandler().command_run_sensors(15)
-
+        self.__handler.write(f"{total_bytes:08X}".upper() + raw_data.hex().upper())
 
 
 
+
+
+# CommandHandler().command_run_sensors((1 << 4))
 

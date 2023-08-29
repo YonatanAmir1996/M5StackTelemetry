@@ -4,7 +4,7 @@ import threading
 import copy
 import time
 import CommonMethods
-
+import struct
 
 class SerialHandler:
     # Manufacture vid & pid
@@ -21,12 +21,11 @@ class SerialHandler:
         for port in serial.tools.list_ports.comports():
             if (self.pid == port.pid) and (self.vid == port.vid):
                 self.__comport = port.name
-        self.__thread = threading.Thread(target=self.__run)
-        self.__can_run = True
-        self.__serial = serial.Serial()
+        self.__serial = serial.Serial(timeout=None)
         self.__serial.baudrate = baudrate
         self.__serial.port = self.__comport
         self.__buffer = []
+        self.connect()
 
     def connect(self):
         """
@@ -40,16 +39,7 @@ class SerialHandler:
             ret_val = self.__serial.is_open
             if ret_val:
                 self.__can_run = True
-                self.__thread.start()
         return ret_val
-
-    def __run(self):
-        while self.__can_run:
-            pending_bytes = self.__serial.in_waiting
-            while pending_bytes > 0:  # While there are bytes available
-                byte_received = self.__serial.read(pending_bytes)
-                self.__buffer.append(byte_received.decode('utf-8'))
-            time.sleep(0.1)
 
     def disconnect(self):
         self.__can_run = False
@@ -68,14 +58,16 @@ class SerialHandler:
                 print(f"{''.join(temp_buffer)}")
         return temp_buffer
 
-    def is_alive(self):
-        return self.__can_run
-
     def write(self, data):
         if self.__serial.is_open and CommonMethods.is_valid_hex_array(data):
-            print(data, bytes.fromhex(data))
+            # print(data, bytes.fromhex(data))
             # Thread lock to prevent from python instance read bytes
-            with threading.Lock():
-                self.__serial.write(bytes.fromhex(data))
-                while self.__serial.in_waiting:
-                    time.sleep(0.1)
+            self.__serial.write(bytes.fromhex(data))
+            while self.__serial.in_waiting < 4:
+                pass
+            bytes_to_read = int.from_bytes(self.__serial.read(4), byteorder='little')
+            print(bytes_to_read)
+            while self.__serial.in_waiting != bytes_to_read:
+                pass
+            bytes_received = self.__serial.read(bytes_to_read)
+            print(bytes_received)

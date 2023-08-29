@@ -17,6 +17,7 @@ class ToF: public PaHubDeviceAbs
         bool begin();
         void update();
         void print();
+        uint32_t writeIntoTxBuffer(uint32_t offset) override;
 
     private:    
         SparkFun_VL53L5CX    myImager;               // Instance of the SparkFun VL53L5CX library for interfacing with the ToF sensor

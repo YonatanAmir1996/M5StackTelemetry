@@ -18,6 +18,7 @@ class HeartRateSensor : public PaHubDeviceAbs
         void print()  override;
         bool restart() override;
         void shutdown() override;
+        uint32_t writeIntoTxBuffer(uint32_t offset) override;
 
     private:
         uint32_t      tsLastReport;

@@ -79,3 +79,19 @@ void Amg8833::print()
     }
     delay(100);
 }
+
+uint32_t Amg8833::writeIntoTxBuffer(uint32_t offset)
+{
+    uint32_t deviceName             = DEVICE_AMG8833_GRID_EYE;
+    uint32_t deviceNumOfBytesToRead = sizeof(deviceName) + sizeof(AMG88xx_PIXEL_ARRAY_SIZE);
+
+    update();
+
+    memcpy(TxBuffer + offset, &deviceNumOfBytesToRead, sizeof(deviceNumOfBytesToRead));
+    offset += sizeof(deviceNumOfBytesToRead);
+    memcpy(TxBuffer + offset, &deviceName, sizeof(deviceName));
+    offset += sizeof(deviceName);
+    memcpy(TxBuffer + offset, &pixels, AMG88xx_PIXEL_ARRAY_SIZE);
+
+    return deviceNumOfBytesToRead + sizeof(deviceNumOfBytesToRead);
+}

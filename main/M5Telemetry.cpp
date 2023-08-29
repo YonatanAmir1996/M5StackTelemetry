@@ -26,13 +26,11 @@ void M5Telemetry::begin()
 {
     // Start M5 initialization with Port A, LCD, and Serial Connection enabled
     M5.begin(true,true,true);
-
-    // Reset all device handlers to NULL
     supportedBitmap = 0x0;
+    // Reset all device handlers to NULL
     for (uint8_t i = 0; i < (uint8_t)DEVICE_MAX_DEVICES; i++) 
     {
         pDeviceHandlers[i] = NULL;
-        supportedBitmap    |= (1 << i);
     }
 
     // CLI handler begin
@@ -268,8 +266,10 @@ void M5Telemetry::standAlonePrint(bool standAloneUpdate)
 
 void M5Telemetry::run(bool forceStandAlone, uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibrationMotorAddress, bool useRgb)
 {
+    M5Tel.scan(buttonHubAddr, fsrAddr, vibrationMotorAddress, useRgb);
     if((false == forceStandAlone) && (true == commandHandler.isConnected()))
     {
+        /*
         xTaskCreatePinnedToCore(
             M5Telemetry::thread,
             "commandHandler",
@@ -279,22 +279,64 @@ void M5Telemetry::run(bool forceStandAlone, uint8_t buttonHubAddr, uint8_t fsrAd
             NULL,   // Task handler
             0       // Core where the task should run.
         );
-
-        /* Main handler */
-        M5.Lcd.println("Pending for master command");
-        while(1)
-        {
-            /* Flag which means command is ready to get parsed*/
-            while(!commandHandler.isCommandReady())
-            {
-                delay(1);
-            }
-        }
+        */
+        slaveHandler();
     }
     else
     {
-        M5Tel.scan(buttonHubAddr, fsrAddr, vibrationMotorAddress, useRgb);
         M5Tel.standAlonePrint(false); 
+    }
+}
+
+void M5Telemetry::slaveHandler()
+{
+    uint32_t commandValue;
+
+    while(1)
+    {
+        M5.Lcd.fillScreen(BLACK);
+        M5.Lcd.setCursor(0,0);
+        M5.Lcd.setTextFont(2);
+        /* Main handler */
+        M5.Lcd.println("Pending for master command");
+        commandValue = 0xFFFFFFFF;
+
+        while(!USBSerial.available())
+        {
+            delay(10);
+        } 
+        /* read rx */
+        USBSerial.readBytes(RxBuffer, 4);
+        commandHandler.rxNumOfBytes = commandHandler.bufferToUint32(RxBuffer);
+        USBSerial.readBytes((RxBuffer + 4), commandHandler.rxNumOfBytes);
+
+        commandValue = commandHandler.bufferToUint32(RxBuffer + 4); // Assumption the 5-8 bytes holds command name
+        M5.Lcd.printf("Received command Id %u\n", commandValue);
+        // Run command
+        switch((Commands_e)commandValue)
+        {
+            case COMMAND_RUN_SENSORS:
+                runCommand(commandHandler.bufferToUint32(RxBuffer + 8));
+                break;
+            default:
+                // Not handled
+                break;
+        }
+        commandHandler.txSerial();
+    }
+}
+
+void M5Telemetry::runCommand(uint32_t bitmap)
+{
+    M5.Lcd.printf("Received bitmap of devices 0x%X\n", bitmap);
+
+    commandHandler.txNumOfBytes = 0;
+    for(uint8_t deviceId = 0; deviceId < (uint8_t)DEVICE_MAX_DEVICES; deviceId++)
+    {
+        if (bitmap & (1 << deviceId))
+        {
+            commandHandler.txNumOfBytes += pDeviceHandlers[deviceId]->writeIntoTxBuffer(commandHandler.txNumOfBytes);
+        }
     }
 }
 

@@ -1,26 +1,29 @@
 #include "CommandHandler.h"
+#include "soc/timer_group_struct.h"
+#include "soc/timer_group_reg.h"
 
+byte          RxBuffer[MAX_BUFFER_SIZE] = {0};
+byte          TxBuffer[MAX_BUFFER_SIZE] = {0};
 CommandHandler commandHandler;
 
-CommandHandler::CommandHandler() : 
-LookupTable
-{
-    [COMMAND_RESCAN_SENSORS]    = NULL,
-    [COMMAND_RUN_SENSORS]       = &CommandHandler::commandRun,
-    [COMMAND_AVAILABLE_DEVICES] = NULL,
-} {}
+CommandHandler::CommandHandler() : canReadBuffer(false), rxNumOfBytes(0), txNumOfBytes(0)
+{}
 
 CommandHandler::~CommandHandler() {}
 
 void CommandHandler::begin() {
   // Try to connect by WIFI/Serial
-  if (USBSerial) {
-    connectionType = RUNNING_MODE_SERIAL;
-  } else {
-    // WIFI NOT SUPPORTED YET !
-    // connectionType = RUNNING_MODE_WIFI;
-    // Try to connect if fails change connection type to RUNNING_MODE_STANDALONE(which equivalents to failure in connection)
-    connectionType = RUNNING_MODE_STANDALONE;
+  if (USBSerial) 
+  {
+      USBSerial.setTimeout(10000);
+      connectionType = RUNNING_MODE_SERIAL;
+  } 
+  else
+  {
+      // WIFI NOT SUPPORTED YET !
+      // connectionType = RUNNING_MODE_WIFI;
+      // Try to connect if fails change connection type to RUNNING_MODE_STANDALONE(which equivalents to failure in connection)
+      connectionType = RUNNING_MODE_STANDALONE;
   }
 }
 
@@ -28,8 +31,30 @@ bool CommandHandler::isConnected() {
   return (connectionType != RUNNING_MODE_STANDALONE);
 }
 
-bool CommandHandler::isCommandReady() {
-  return false;
+bool CommandHandler::isBufferReadyRead() {
+  return canReadBuffer;
+}
+
+void CommandHandler::txSerial() {
+    uint32_t remainedBytes = 4;
+    // Clean Rx Buffer
+    rxNumOfBytes = 0;
+
+    // Send number of bytes that will be sent
+    while (remainedBytes)
+    {
+        remainedBytes -= USBSerial.write((byte*)&txNumOfBytes, remainedBytes);
+    }
+    USBSerial.flush();
+    remainedBytes = txNumOfBytes;
+    while (remainedBytes)
+    {
+        remainedBytes -= USBSerial.write(TxBuffer + (txNumOfBytes - remainedBytes), remainedBytes);
+    }
+    USBSerial.flush();
+    txNumOfBytes = 0;
+    // Clean TX buffer
+    canReadBuffer = false; // Waiting for data
 }
 
 void CommandHandler::run() {
@@ -39,32 +64,27 @@ void CommandHandler::run() {
   }
 }
 
-void CommandHandler::runSerialMode() {
-  String commandStr;
-  char inChar;
-  Commands_e commandName;
-
-  while (1) 
-  {
-       commandStr = "";
-       while (true) {
-         // Check for incoming data
-         if (USBSerial.available() > 0) 
-         {
-              byte buf[4];
-              USBSerial.readBytes(buf, 4);
-              int value = ((int)buf[0] << 24) | 
-                ((int)buf[1] << 16) | 
-                ((int)buf[2] << 8)  | 
-                buf[3];
-              M5.Lcd.printf("number of bytes to read %u", value);
-              M5.Lcd.println(USBSerial.readString());
-         }
-         delay(1);  // A short delay to allow buffer to fill
-       }
-  }
+void CommandHandler::runSerialMode() 
+{
+    while (1) 
+    {
+        // Check for incoming data
+        if (USBSerial.available() > 0) 
+        {
+            USBSerial.readBytes(RxBuffer, 4);
+            rxNumOfBytes = bufferToUint32(RxBuffer);
+            USBSerial.readBytes((RxBuffer + 4), rxNumOfBytes);
+            canReadBuffer = true;
+            while(canReadBuffer)
+            {
+                delay(100);  // A short delay to allow buffer to fill
+            }
+        }
+        delay(1);
+    }
 }
 
-void CommandHandler::commandRun(String command) 
+uint32_t CommandHandler::bufferToUint32(const byte* buffer)
 {
+     return ((uint32_t)buffer[0] << 24) |  ((uint32_t)buffer[1] << 16) | ((uint32_t)buffer[2] << 8)  | buffer[3];
 }

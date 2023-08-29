@@ -93,3 +93,18 @@ void ToF::print()
         M5.Lcd.println();
     }
 }
+
+uint32_t ToF::writeIntoTxBuffer(uint32_t offset)
+{
+    uint32_t  deviceName = DEVICE_VL3L5CX_TOF;
+    uint32_t  deviceNumOfBytesToRead = sizeof(deviceName) + sizeof(measurementData.distance_mm);
+
+    update();
+
+    memcpy(TxBuffer + offset, &deviceNumOfBytesToRead, sizeof(deviceNumOfBytesToRead));
+    offset += sizeof(deviceNumOfBytesToRead);
+    memcpy(TxBuffer + offset, &deviceName, sizeof(deviceName));
+    offset += sizeof(deviceName);
+    memcpy(TxBuffer + offset, &measurementData.distance_mm, sizeof(measurementData.distance_mm));
+    return deviceNumOfBytesToRead + sizeof(deviceNumOfBytesToRead);
+}

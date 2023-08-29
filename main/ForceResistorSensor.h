@@ -17,6 +17,7 @@ class ForceResistorSensor : public DeviceAbs
         void update() override;
         bool begin(uint8_t addr) override;
         void print() override;
+        uint32_t writeIntoTxBuffer(uint32_t offset) override;
 
     private:
         uint8_t  hubAddr;

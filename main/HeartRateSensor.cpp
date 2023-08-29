@@ -93,3 +93,26 @@ void HeartRateSensor::print()
     M5.Lcd.print(pox.getSpO2());
     M5.Lcd.println("%");
 }
+
+uint32_t HeartRateSensor::writeIntoTxBuffer(uint32_t offset)
+{
+    uint32_t  deviceName = DEVICE_HEART_UNIT_MAX_30100;
+    uint32_t  deviceNumOfBytesToRead;
+    float     heartRate;
+    uint8_t   spO2;
+
+    update();
+    deviceNumOfBytesToRead = sizeof(deviceName) + sizeof(heartRate) + sizeof(spO2);
+    heartRate = pox.getHeartRate();
+    spO2      = pox.getSpO2();
+
+    memcpy(TxBuffer + offset, &deviceNumOfBytesToRead, sizeof(deviceNumOfBytesToRead));
+    offset += sizeof(deviceNumOfBytesToRead);
+    memcpy(TxBuffer + offset, &deviceName, sizeof(deviceName));
+    offset += sizeof(deviceName);
+    memcpy(TxBuffer + offset, &heartRate, sizeof(heartRate));
+    offset += sizeof(heartRate);
+    memcpy(TxBuffer + sizeof(heartRate) + offset, &spO2, sizeof(spO2));
+    offset += sizeof(spO2);
+    return deviceNumOfBytesToRead + sizeof(deviceNumOfBytesToRead);
+}

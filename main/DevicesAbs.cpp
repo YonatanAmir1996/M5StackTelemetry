@@ -61,3 +61,5 @@ void DeviceAbs::setFrequency(uint32_t freq)
         delay(100);
     }
 }
+
+uint32_t DeviceAbs::writeIntoTxBuffer(uint32_t offset) {return 0;}
