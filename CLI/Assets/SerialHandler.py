@@ -38,8 +38,7 @@ class SerialHandler:
         else:
             self.__serial.open()
             ret_val = self.__serial.is_open
-            if ret_val:
-                self.__can_run = True
+            print(f"connected to device {ret_val}")
         return ret_val
 
     def disconnect(self):

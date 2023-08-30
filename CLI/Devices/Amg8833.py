@@ -2,7 +2,7 @@
 import os
 import sys
 import struct
-
+import numpy as np
 # Determine the root path based on the current file's location
 root_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../")
 
@@ -28,8 +28,8 @@ class Amg8833(DeviceAbs.DeviceAbs):
         """
         # Initialize the base class
         super().__init__(DeviceAbs.Device_e.AMG833)
-        # Initialize the pixels list which will hold the sensor readings
-        self.pixels = []
+        # Initialize the pixels as an 8x8 numpy matrix filled with zeros
+        self.pixels = np.zeros((8, 8), dtype=float)
 
     def set(self, data: bytes):
         """
@@ -38,14 +38,14 @@ class Amg8833(DeviceAbs.DeviceAbs):
         Args:
             data (bytes): The byte sequence containing the sensor data.
         """
-        # Unpack the byte sequence and store them in the pixels list
-        self.pixels = list(struct.unpack(f"<{Amg8833.PIXEL_ARRAY_SIZE}f", data))
+        # Unpack the byte sequence and reshape it to a 8x8 matrix
+        self.pixels = np.array(struct.unpack(f"<{Amg8833.PIXEL_ARRAY_SIZE}f", data)).reshape(8, 8)
 
     def __str__(self):
         """
         Returns a string representation of the AMG88xx instance as an 8x8 matrix.
         """
-        matrix_representation = ""
-        for i in range(0, Amg8833.PIXEL_ARRAY_SIZE, 8):
-            matrix_representation += ' | '.join(['%3.1f' % val for val in self.pixels[i:i + 8]]) + '\n'
-        return f"AMG88xx pixel values:\n{matrix_representation}"
+        # Convert the matrix to a formatted string
+        formatted_str = np.array2string(self.pixels, formatter={'float_kind': lambda x: "%.1f" % x})
+
+        return f"AMG88xx pixel values:\n{formatted_str}"

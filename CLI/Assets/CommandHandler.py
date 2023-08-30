@@ -30,6 +30,9 @@ class CommandHandler:
         if self.__handler is None:
             raise ConnectionError("Couldn't connect to M5Stack")
 
+    def disconnect(self):
+        self.__handler.disconnect()
+
     def command_run_sensors(self, sensors_bmp:int):
         """
         :param   sensors_bmp: sensors bitmap according to DeviceName_e enum

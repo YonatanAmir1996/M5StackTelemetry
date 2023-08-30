@@ -30,7 +30,6 @@ class CommandHandler
 
         bool isConnected();
         void begin();
-        bool isBufferReadyRead();
         void txSerial();
         void rxSerial();   
         uint32_t bufferToUint32(const byte* buffer);

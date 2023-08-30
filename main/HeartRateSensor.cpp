@@ -48,8 +48,8 @@ void HeartRateSensor::update()
         pox.update();
     }
 
-    //heartRate = pox.getHeartRate();
-    //spo2      = pox.getSpO2();
+    heartRate = pox.getHeartRate();
+    spo2      = pox.getSpO2();
 }
 
 /**
@@ -57,9 +57,11 @@ void HeartRateSensor::update()
  */
 void HeartRateSensor::shutdown()
 {
+    /*
     setFrequency(I2C_FREQ_400KHZ);
     switchPort();
     pox.shutdown();
+    */
 }
 
 /**
@@ -68,10 +70,12 @@ void HeartRateSensor::shutdown()
  */
 bool HeartRateSensor::restart()
 {
+    /*
     switchPort(); 
     setFrequency(I2C_FREQ_400KHZ);
     pox.resume();
-    return true;
+    */
+    return true; 
 }
 
 /**
@@ -79,7 +83,7 @@ bool HeartRateSensor::restart()
  */
 void HeartRateSensor::print()
 {
-    setFrequency(I2C_FREQ_400KHZ);
+    setFrequency(I2C_FREQ_100KHZ);
     switchPort(); 
     // Asynchronously dump heart rate and oxidation levels to the serial
     // For both, a value of 0 means "invalid"
@@ -98,13 +102,9 @@ uint32_t HeartRateSensor::writeIntoTxBuffer(uint32_t offset)
 {
     uint32_t  deviceName = DEVICE_HEART_UNIT_MAX_30100;
     uint32_t  deviceNumOfBytesToRead;
-    float     heartRate;
-    uint8_t   spO2;
 
     update();
-    deviceNumOfBytesToRead = sizeof(deviceName) + sizeof(heartRate) + sizeof(spO2);
-    heartRate = pox.getHeartRate();
-    spO2      = pox.getSpO2();
+    deviceNumOfBytesToRead = sizeof(deviceName) + sizeof(heartRate) + sizeof(spo2);
 
     memcpy(TxBuffer + offset, &deviceNumOfBytesToRead, sizeof(deviceNumOfBytesToRead));
     offset += sizeof(deviceNumOfBytesToRead);
@@ -112,7 +112,7 @@ uint32_t HeartRateSensor::writeIntoTxBuffer(uint32_t offset)
     offset += sizeof(deviceName);
     memcpy(TxBuffer + offset, &heartRate, sizeof(heartRate));
     offset += sizeof(heartRate);
-    memcpy(TxBuffer + sizeof(heartRate) + offset, &spO2, sizeof(spO2));
-    offset += sizeof(spO2);
+    memcpy(TxBuffer + sizeof(heartRate) + offset, &spo2, sizeof(spo2));
+    offset += sizeof(spo2);
     return deviceNumOfBytesToRead + sizeof(deviceNumOfBytesToRead);
 }

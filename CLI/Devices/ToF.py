@@ -2,6 +2,7 @@
 import os
 import sys
 import struct
+import numpy as np  # <-- Add this import
 
 # Determine the root path based on the current file's location
 root_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../")
@@ -29,8 +30,8 @@ class ToF(DeviceAbs.DeviceAbs):
         # Initialize the base class
         super().__init__(DeviceAbs.Device_e.TOF)
 
-        # Initialize the mm_distances list which will hold the ToF readings in millimeters
-        self.mm_distances = []
+        # Initialize the mm_distances as an 8x8 numpy matrix filled with zeros
+        self.mm_distances = np.zeros((8, 8), dtype=np.uint16)
 
     def set(self, data: bytes):
         """
@@ -39,16 +40,13 @@ class ToF(DeviceAbs.DeviceAbs):
         Args:
             data (bytes): The byte sequence containing the ToF data.
         """
-        # Unpack the byte sequence as 64 Little Endian 16-bit unsigned integers
-        # and store them in the mm_distances list
-        self.mm_distances = list(struct.unpack(f"<{ToF.tof_num_of_pixels}H", data))
+        # Unpack the byte sequence as 64 Little Endian 16-bit unsigned integers,
+        # reshape it to a 8x8 matrix, and store in mm_distances
+        self.mm_distances = np.array(struct.unpack(f"<{ToF.tof_num_of_pixels}H", data)).reshape(8, 8)
 
     def __str__(self):
         """
         Returns a string representation of the ToF instance as an 8x8 matrix.
         """
-        matrix_representation = ""
-        for i in range(0, ToF.tof_num_of_pixels, 8):
-            matrix_representation += ' | '.join(map(str, self.mm_distances[i:i + 8])) + '\n'
-
-        return f"ToF distances:\n{matrix_representation}"
+        # Convert the matrix to a formatted string
+        return f"ToF distances:\n{np.array2string(self.mm_distances)}"
