@@ -32,6 +32,7 @@ bool ForceResistorSensor::begin(uint8_t addr)
 void ForceResistorSensor::update()
 {
     fsrValue = PbHub.readAnalogVal(hubAddr);
+    /*
     if(!outputWasSet && (fsrValue > FSR_THRESHOLD))
     {
         RGBDevice.SetRGB(0, 0, 100, 0);
@@ -48,6 +49,7 @@ void ForceResistorSensor::update()
         vibrationMotor.setMotor(0);
         outputWasSet = false;
     }
+    */
 }
 
 /**
@@ -60,4 +62,20 @@ void ForceResistorSensor::print()
     M5.Lcd.print("FSR Value: ");
     M5.Lcd.println(fsrValue);
     delay(100);
+}
+
+uint32_t ForceResistorSensor::writeIntoTxBuffer(uint32_t offset)
+{
+    uint32_t deviceName             = DEVICE_FSR402;
+    uint32_t deviceNumOfBytesToRead = sizeof(deviceName) + sizeof(fsrValue);
+
+    update();
+
+    memcpy(TxBuffer + offset, &deviceNumOfBytesToRead, sizeof(deviceNumOfBytesToRead));
+    offset += sizeof(deviceNumOfBytesToRead);
+    memcpy(TxBuffer + offset, &deviceName, sizeof(deviceName));
+    offset += sizeof(deviceName);
+    memcpy(TxBuffer + offset, &fsrValue, sizeof(fsrValue));
+
+    return deviceNumOfBytesToRead + sizeof(deviceNumOfBytesToRead);
 }

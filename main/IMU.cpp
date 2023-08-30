@@ -46,3 +46,20 @@ void IMU::print()
                      M5.IMU.accel_data.x, M5.IMU.accel_data.y,
                      M5.IMU.accel_data.z);
 }
+
+uint32_t IMU::writeIntoTxBuffer(uint32_t offset)
+{
+    uint32_t  deviceName = DEVICE_IMU;
+    uint32_t  deviceNumOfBytesToRead = sizeof(deviceName) + sizeof(M5.IMU.gyro_data) + sizeof(M5.IMU.accel_data);
+
+    update();
+
+    memcpy(TxBuffer + offset, &deviceNumOfBytesToRead, sizeof(deviceNumOfBytesToRead));
+    offset += sizeof(deviceNumOfBytesToRead);
+    memcpy(TxBuffer + offset, &deviceName, sizeof(deviceName));
+    offset += sizeof(deviceName);
+    memcpy(TxBuffer + offset, &M5.IMU.gyro_data, sizeof(M5.IMU.gyro_data));
+    offset += sizeof(M5.IMU.gyro_data);
+    memcpy(TxBuffer + offset, &M5.IMU.accel_data, sizeof(M5.IMU.accel_data));
+    return deviceNumOfBytesToRead + sizeof(deviceNumOfBytesToRead);
+}

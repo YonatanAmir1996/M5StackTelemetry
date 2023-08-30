@@ -2,10 +2,11 @@
 #define COMMAND_HANDLER_H
 
 #include "SharedDefines.h"
+#include <stdint.h>
 #include <M5CoreS3.h>
 
 #define MAX_ARGUMENTS 10
-#define INVALID_VALUE 0xFFFFFFFF
+#define MAX_BUFFER_SIZE 1024 * 2 // 10 KB buffer
 
 typedef struct
 {
@@ -27,32 +28,24 @@ class CommandHandler
         CommandHandler();
         ~CommandHandler();
 
-        void run(); 
         bool isConnected();
         void begin();
-        bool isCommandReady();
+        void txSerial();
+        void rxSerial();   
+        uint32_t bufferToUint32(const byte* buffer);
+  
 
-        /* Commands parser*/
-        
-
-    private:
-        typedef void (CommandHandler::*CallbackCommandFunction)(String);
-
-        void        runSerialMode();     
-        Commands_e  getCommandName(String command);   
-        void        ArgsParser(const String &command, ArgumentParser_t *argsStruct); 
-        Arguments_t parseKeyValue(const String &item); 
-        bool        isInteger(String input);
-
-        /* Commands */
-        void       commandShowUsage(String command);
-        void       commandRun(String command);
+    public:
+        uint32_t                rxNumOfBytes;
+        uint32_t                txNumOfBytes;
 
     private:
         RunningMode_e           connectionType;
-        CallbackCommandFunction LookupTable[COMMAND_END];
+        bool                    canReadBuffer;
 };
 
+extern byte           RxBuffer[MAX_BUFFER_SIZE];
+extern byte           TxBuffer[MAX_BUFFER_SIZE];
 extern CommandHandler commandHandler;
 
 #endif // COMMAND_HANDLER_H

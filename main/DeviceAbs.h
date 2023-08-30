@@ -3,7 +3,7 @@
 #define DEVICE_ABS_H
 
 #include "SharedDefines.h"
-
+#include "CommandHandler.h"
 #define NUMBER_OF_BEGIN_TRIES 3
 
 
@@ -20,6 +20,7 @@ class DeviceAbs {
         virtual void print();
         virtual bool restart();
         virtual void shutdown();
+        virtual uint32_t writeIntoTxBuffer(uint32_t offset);
         void         setFrequency(uint32_t freq);
 };
 

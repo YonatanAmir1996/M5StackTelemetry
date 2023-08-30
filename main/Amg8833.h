@@ -18,7 +18,7 @@ class Amg8833: public PaHubDeviceAbs
         bool begin()  override;
         void update() override;
         void print()  override;
-
+        uint32_t writeIntoTxBuffer(uint32_t offset) override;
 
     private:    
         float            pixels[AMG88xx_PIXEL_ARRAY_SIZE];

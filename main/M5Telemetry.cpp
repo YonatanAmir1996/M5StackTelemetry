@@ -26,13 +26,11 @@ void M5Telemetry::begin()
 {
     // Start M5 initialization with Port A, LCD, and Serial Connection enabled
     M5.begin(true,true,true);
-
-    // Reset all device handlers to NULL
     supportedBitmap = 0x0;
+    // Reset all device handlers to NULL
     for (uint8_t i = 0; i < (uint8_t)DEVICE_MAX_DEVICES; i++) 
     {
         pDeviceHandlers[i] = NULL;
-        supportedBitmap    |= (1 << i);
     }
 
     // CLI handler begin
@@ -268,41 +266,63 @@ void M5Telemetry::standAlonePrint(bool standAloneUpdate)
 
 void M5Telemetry::run(bool forceStandAlone, uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibrationMotorAddress, bool useRgb)
 {
+    M5Tel.scan(buttonHubAddr, fsrAddr, vibrationMotorAddress, useRgb);
     if((false == forceStandAlone) && (true == commandHandler.isConnected()))
     {
-        xTaskCreatePinnedToCore(
-            M5Telemetry::thread,
-            "commandHandler",
-            4096,   // The size of the task stack specified as the number of (in bytes)
-            NULL,   // Pointer that will be used as the parameter for the task being created.
-            2,      // Priority of the task
-            NULL,   // Task handler
-            0       // Core where the task should run.
-        );
-
-        /* Main handler */
-        M5.Lcd.println("Pending for master command");
-        while(1)
-        {
-            /* Flag which means command is ready to get parsed*/
-            while(!commandHandler.isCommandReady())
-            {
-                delay(1);
-            }
-        }
+        slaveHandler();
     }
     else
     {
-        M5Tel.scan(buttonHubAddr, fsrAddr, vibrationMotorAddress, useRgb);
         M5Tel.standAlonePrint(false); 
     }
 }
 
-/** 
- * @brief thread handler
- * @details Static attribute to run command handler in thread(must be a static method)
- */
-void M5Telemetry::thread(void* pvParameters)
+void M5Telemetry::slaveHandler()
 {
-    commandHandler.run();
+    uint32_t commandValue;
+
+
+    while(1)
+    {
+        commandHandler.rxSerial();
+        commandValue = commandHandler.bufferToUint32(RxBuffer + 4); // Assumption the 5-8 bytes holds command name
+        M5.Lcd.printf("Received command Id %u\n", commandValue);
+        // Run command
+        switch((Commands_e)commandValue)
+        {
+            case COMMAND_RUN_SENSORS:
+                runCommand(commandHandler.bufferToUint32(RxBuffer + 8));
+                break;
+            case COMMAND_RESCAN_SENSORS:
+                rescanCommand(commandHandler.bufferToUint32(RxBuffer + 8), commandHandler.bufferToUint32(RxBuffer + 12), commandHandler.bufferToUint32(RxBuffer + 16), commandHandler.bufferToUint32(RxBuffer + 20));
+                break;
+            default:
+                M5.Lcd.fillScreen(BLACK);
+                M5.Lcd.setCursor(0,0);
+                M5.Lcd.setTextFont(2);
+                M5.Lcd.println("ASSERT ! Unknown command reset device");
+                while(1) {}
+                break;
+        }
+        commandHandler.txSerial();
+    }
+}
+
+void M5Telemetry::runCommand(uint32_t bitmap)
+{
+    M5.Lcd.printf("Received bitmap of devices 0x%X\n", bitmap);
+
+    commandHandler.txNumOfBytes = 0;
+    for(uint8_t deviceId = 0; deviceId < (uint8_t)DEVICE_MAX_DEVICES; deviceId++)
+    {
+        if (bitmap & (1 << deviceId))
+        {
+            commandHandler.txNumOfBytes += pDeviceHandlers[deviceId]->writeIntoTxBuffer(commandHandler.txNumOfBytes);
+        }
+    }
+}
+
+void M5Telemetry::rescanCommand(uint32_t buttonHubAddr, uint32_t fsrAddr, uint32_t vibrationMotorAddress, uint32_t useRgb)
+{
+    M5Tel.scan(buttonHubAddr, fsrAddr, vibrationMotorAddress, useRgb);
 }
