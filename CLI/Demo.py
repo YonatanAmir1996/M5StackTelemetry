@@ -7,9 +7,20 @@ sys.path.append(root_path)
 
 from CLI.M5Telemetry import M5Telemetry
 from CLI.Devices.DeviceAbs import Device_e
+import time
 
 if __name__ == '__main__':
     interface = M5Telemetry()
-    for i in range(80):
-        interface.update_values(1 << Device_e.HRU)
-        print(interface.hru)
+    num_of_iter = 0
+    while True:
+        sensor_bmp = 1 << Device_e.TOF.value | 1 << Device_e.IMU.value | 1 << Device_e.FSR.value
+        print(f"{sensor_bmp:X}")
+        interface.update_values(sensor_bmp)
+        print(interface.fsr)
+        print(interface.imu)
+        print(interface.amg)
+        print(interface.tof)
+        num_of_iter += 1
+        time.sleep(1)
+
+
