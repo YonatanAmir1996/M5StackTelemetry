@@ -20,10 +20,10 @@ class M5Telemetry
         void update();
         void scanPaHub();
         void run(bool forceStandAlone, uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibrationMotorAddress, bool useRgb);   
-        static void thread(void* pvParameters);
 
     private:
         void runCommand(uint32_t bitmap);
+        void rescanCommand(uint32_t buttonHubAddr, uint32_t fsrAddr, uint32_t vibrationMotorAddress, uint32_t useRgb);
         void slaveHandler();
 
     private:

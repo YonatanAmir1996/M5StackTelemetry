@@ -1,4 +1,9 @@
 import re
+import os
+import sys
+
+root_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../")
+sys.path.append(root_path)
 
 
 def is_valid_hex_array(data):

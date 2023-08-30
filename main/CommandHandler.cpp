@@ -31,10 +31,6 @@ bool CommandHandler::isConnected() {
   return (connectionType != RUNNING_MODE_STANDALONE);
 }
 
-bool CommandHandler::isBufferReadyRead() {
-  return canReadBuffer;
-}
-
 void CommandHandler::txSerial() {
     uint32_t remainedBytes = 4;
     // Clean Rx Buffer
@@ -57,31 +53,24 @@ void CommandHandler::txSerial() {
     canReadBuffer = false; // Waiting for data
 }
 
-void CommandHandler::run() {
-  /* Endless loop */
-  if (RUNNING_MODE_SERIAL == connectionType) {
-    CommandHandler::runSerialMode();
-  }
-}
 
-void CommandHandler::runSerialMode() 
+void CommandHandler::rxSerial() 
 {
-    while (1) 
+    M5.Lcd.fillScreen(BLACK);
+    M5.Lcd.setCursor(0,0);
+    M5.Lcd.setTextFont(2);
+    /* Main handler */
+    M5.Lcd.println("Pending for master command");
+
+    while(!USBSerial.available())
     {
-        // Check for incoming data
-        if (USBSerial.available() > 0) 
-        {
-            USBSerial.readBytes(RxBuffer, 4);
-            rxNumOfBytes = bufferToUint32(RxBuffer);
-            USBSerial.readBytes((RxBuffer + 4), rxNumOfBytes);
-            canReadBuffer = true;
-            while(canReadBuffer)
-            {
-                delay(100);  // A short delay to allow buffer to fill
-            }
-        }
-        delay(1);
-    }
+        delay(10);
+    } 
+
+    /* Read rx */
+    USBSerial.readBytes(RxBuffer, 4);
+    commandHandler.rxNumOfBytes = commandHandler.bufferToUint32(RxBuffer);
+    USBSerial.readBytes((RxBuffer + 4), commandHandler.rxNumOfBytes);
 }
 
 uint32_t CommandHandler::bufferToUint32(const byte* buffer)

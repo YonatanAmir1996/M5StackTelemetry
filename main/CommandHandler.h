@@ -28,15 +28,13 @@ class CommandHandler
         CommandHandler();
         ~CommandHandler();
 
-        void run(); 
         bool isConnected();
         void begin();
         bool isBufferReadyRead();
         void txSerial();
+        void rxSerial();   
         uint32_t bufferToUint32(const byte* buffer);
-
-    private:
-        void        runSerialMode();     
+  
 
     public:
         uint32_t                rxNumOfBytes;

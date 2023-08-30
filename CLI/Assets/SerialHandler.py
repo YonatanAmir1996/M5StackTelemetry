@@ -1,10 +1,11 @@
 import serial.tools.list_ports
 import serial
-import threading
-import copy
-import time
-import CommonMethods
-import struct
+import os
+import sys
+root_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../")
+sys.path.append(root_path)
+import CLI.Assets.CommonMethods as CommonMethods
+
 
 class SerialHandler:
     # Manufacture vid & pid
@@ -42,21 +43,7 @@ class SerialHandler:
         return ret_val
 
     def disconnect(self):
-        self.__can_run = False
         self.__serial.close()
-
-    def dump_buffer(self, print_buffer=False):
-        """
-        Dumps raw data from Serial
-        :return:
-        """
-        temp_buffer = []
-        if self.__buffer:
-            temp_buffer = copy.deepcopy(self.__buffer)
-            self.__buffer = []
-            if print_buffer:
-                print(f"{''.join(temp_buffer)}")
-        return temp_buffer
 
     def write(self, data):
         if self.__serial.is_open and CommonMethods.is_valid_hex_array(data):
@@ -66,8 +53,9 @@ class SerialHandler:
             while self.__serial.in_waiting < 4:
                 pass
             bytes_to_read = int.from_bytes(self.__serial.read(4), byteorder='little')
-            print(bytes_to_read)
+            self.__serial.flush()
+            # print(bytes_to_read)
             while self.__serial.in_waiting != bytes_to_read:
                 pass
-            bytes_received = self.__serial.read(bytes_to_read)
-            print(bytes_received)
+            bytes_received = self.__serial.read(self.__serial.in_waiting)
+            return bytes_received
