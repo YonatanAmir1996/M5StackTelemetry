@@ -10,15 +10,17 @@ from CLI.Assets.SerialHandler import SerialHandler
 class Commands_e(enum.IntEnum):
     COMMAND_RESCAN_SENSORS = 0
     COMMAND_RUN_SENSORS = 1
+    COMMAND_SET_RGB = 2
+    COMMAND_SET_MOTOR = 3
 
 
-class PbHubPort_e(enum.IntEnum):
-    PORT_0 = 0
-    PORT_1 = 1
-    PORT_2 = 2
-    PORT_3 = 3
-    PORT_4 = 4
-    PORT_5 = 5
+class PbHubPortAddr_e(enum.IntEnum):
+    PORT_0 = 0x40
+    PORT_1 = 0x50
+    PORT_2 = 0x60
+    PORT_3 = 0x70
+    PORT_4 = 0x80
+    PORT_5 = 0xA0
 
 
 class CommandHandler:
@@ -42,10 +44,16 @@ class CommandHandler:
             raise TypeError("Please use int type only !")
         return self.send_command(Commands_e.COMMAND_RUN_SENSORS, sensors_bmp)
 
-    def command_rescan_sensors(self, button_pb_hub_addr : PbHubPort_e, fsr_pb_hub_addr : PbHubPort_e = PbHubPort_e.PORT_1,
-                               vibration_motor_pb_hub_addr : PbHubPort_e=PbHubPort_e.PORT_2, is_rgb_connected=True):
+    def command_rescan_sensors(self, button_pb_hub_addr:PbHubPortAddr_e, fsr_pb_hub_addr:PbHubPortAddr_e,
+                               vibration_motor_pb_hub_addr:PbHubPortAddr_e, is_rgb_connected:bool):
         return self.send_command(Commands_e.COMMAND_RESCAN_SENSORS, button_pb_hub_addr.value, fsr_pb_hub_addr.value,
                                  vibration_motor_pb_hub_addr.value, is_rgb_connected)
+
+    def command_set_rgb(self, id: int, red: int, green: int, blue: int):
+        return self.send_command(Commands_e.COMMAND_SET_RGB, id, red, green, blue)
+
+    def command_set_motor(self, duty_cycle: int):
+        return self.send_command(Commands_e.COMMAND_SET_MOTOR, duty_cycle)
 
     def send_command(self, command : Commands_e, *args, **kwargs):
         """

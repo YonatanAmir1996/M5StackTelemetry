@@ -1,14 +1,14 @@
 import os
 import sys
 import struct
-
+import time
 # Determine the root directory based on the current file's location
 # and append it to the system's path list to ensure correct module imports.
 root_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../")
 sys.path.append(root_path)
 
 # Import necessary modules and classes from the CLI package.
-from CLI.Assets.CommandHandler import CommandHandler
+from CLI.Assets.CommandHandler import CommandHandler, PbHubPortAddr_e
 from CLI.Devices.DeviceAbs import Device_e
 from CLI.Devices.Fsr import Fsr
 from CLI.Devices.Imu import Imu
@@ -68,3 +68,39 @@ class M5Telemetry:
 
             # Reduce the remaining size of the data stream.
             size -= temp_size + 4
+
+    def rescan(self, button_pb_hub_addr: PbHubPortAddr_e, fsr_pb_hub_addr: PbHubPortAddr_e = PbHubPortAddr_e.PORT_1,
+               vibration_motor_pb_hub_addr: PbHubPortAddr_e = PbHubPortAddr_e.PORT_2,
+               is_rgb_connected: bool = True):
+        """
+        Rescan devices
+        :param button_pb_hub_addr: button pb hub addr
+        :param fsr_pb_hub_addr:  fsr pb hub addr
+        :param vibration_motor_pb_hub_addr:  vibration motor pb hub addr
+        :param is_rgb_connected: is rgb connected to port B
+        :return:
+        """
+        self.__command_handler.command_rescan_sensors(button_pb_hub_addr, fsr_pb_hub_addr, vibration_motor_pb_hub_addr,
+                                                      is_rgb_connected)
+        print("rescanned devices successfully !")
+
+    def command_set_rgb(self, id: int = 0, red: int = 0, green: int = 0, blue: int = 0):
+        """
+
+        :param id: led id
+        :param red: 0-100
+        :param green: 0-100
+        :param blue: 0-100
+        :return:
+        """
+        self.__command_handler.command_set_rgb(id, red, green, blue)
+        time.sleep(0.2)
+
+    def command_set_motor(self, duty_cycle: int=50):
+        """
+        sets motor duty cycle
+        :param duty_cycle:
+        :return:
+        """
+        self.__command_handler.command_set_motor(duty_cycle)
+        time.sleep(0.1)

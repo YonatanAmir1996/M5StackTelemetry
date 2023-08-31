@@ -6,7 +6,8 @@
  * 
  * Initializes the IMU device attributes.
  */
-IMU::IMU()
+IMU::IMU() :
+imuConnected(false)
 {
 }
 
@@ -17,7 +18,11 @@ IMU::IMU()
  */
 bool IMU::begin()
 {
-    M5.IMU.Init(); // Init IMU.               
+    if(!imuConnected)
+    {
+        M5.IMU.Init(); // Init IMU. 
+        imuConnected = true;     
+    }         
     return true;
 }
 

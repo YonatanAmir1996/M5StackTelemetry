@@ -48,4 +48,4 @@ class Amg8833(DeviceAbs.DeviceAbs):
         # Convert the matrix to a formatted string
         formatted_str = np.array2string(self.pixels, formatter={'float_kind': lambda x: "%.1f" % x})
 
-        return f"AMG88xx pixel values:\n{formatted_str}"
+        return f"AMG88xx \N{DEGREE SIGN} 8x8:\n{formatted_str}"

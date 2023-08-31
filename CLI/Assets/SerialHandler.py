@@ -2,6 +2,7 @@ import serial.tools.list_ports
 import serial
 import os
 import sys
+
 root_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../")
 sys.path.append(root_path)
 import CLI.Assets.CommonMethods as CommonMethods
@@ -48,13 +49,20 @@ class SerialHandler:
         if self.__serial.is_open and CommonMethods.is_valid_hex_array(data):
             # print(data, bytes.fromhex(data))
             # Thread lock to prevent from python instance read bytes
-            self.__serial.write(bytes.fromhex(data))
+            data = bytes.fromhex(data)
+            num_of_bytes_write = len(data)
+            while num_of_bytes_write:
+                num_of_bytes_write -= self.__serial.write(data)
+            self.__serial.flush()
             while self.__serial.in_waiting < 4:
                 pass
             bytes_to_read = int.from_bytes(self.__serial.read(4), byteorder='little')
-            self.__serial.flush()
             # print(bytes_to_read)
-            while self.__serial.in_waiting != bytes_to_read:
-                pass
-            bytes_received = self.__serial.read(self.__serial.in_waiting)
+            if bytes_to_read:
+                self.__serial.flush()
+                while self.__serial.in_waiting != bytes_to_read:
+                    pass
+                bytes_received = self.__serial.read(self.__serial.in_waiting)
+            else:
+                bytes_received = bytes()
             return bytes_received

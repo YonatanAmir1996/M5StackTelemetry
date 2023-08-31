@@ -22,9 +22,11 @@ class M5Telemetry
         void run(bool forceStandAlone, uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibrationMotorAddress, bool useRgb);   
 
     private:
-        void runCommand(uint32_t bitmap);
-        void rescanCommand(uint32_t buttonHubAddr, uint32_t fsrAddr, uint32_t vibrationMotorAddress, uint32_t useRgb);
+        void runCommand();
+        void rescanCommand();
         void slaveHandler();
+        void setRgbCommand();
+        void setMotorCommand();
 
     private:
         RunningMode_e       runningMode; 

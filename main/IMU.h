@@ -13,11 +13,13 @@ class IMU: public DeviceAbs
 {
     public:
         IMU();
-        bool begin()  override;
+        bool begin() override;
         void update() override;
         void print()  override;
         uint32_t writeIntoTxBuffer(uint32_t offset) override;
 
+    private:
+        bool imuConnected;
 };
 
 #endif
