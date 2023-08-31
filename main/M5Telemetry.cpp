@@ -37,9 +37,10 @@ void M5Telemetry::begin()
     commandHandler.begin();
 }
 
-/** 
- * @brief Scan the PaHub to identify which devices are connected.
- * @details This function maps the connected devices to their corresponding ports on the PaHub.
+/**
+ * @brief Scans the PaHub to identify connected devices.
+ * @details Maps the connected devices to their corresponding ports on the PaHub.
+ *          Determines which devices are present and notes their ports.
  */
 void M5Telemetry::scanPaHub()
 {
@@ -63,8 +64,6 @@ void M5Telemetry::scanPaHub()
         Wire.beginTransmission(PA_HUB_I2C_ADDR);
         Wire.write(1 << port);
         retVal = Wire.endTransmission();
-        delay(200);
-
         if(VALID_I2C_END_TRANSMISSION_VALUE == retVal)
         {
             // Try determine which i2c are responding
@@ -197,10 +196,11 @@ void M5Telemetry::update()
     }
 }
 
-/** 
- * @brief Standalone run function.
- * @param standAloneUpdate Flag to determine if update should be standalone(update only the sensor which is printed to screen), used for debug purposes a single device.
+/**
+ * @brief Standalone run function to display sensor data.
  * @details Displays sensor data and manages sensor state transitions based on button presses.
+ * 
+ * @param standAloneUpdate Flag for standalone update mode.
  */
 void M5Telemetry::standAlonePrint(bool standAloneUpdate)
 {
@@ -264,6 +264,15 @@ void M5Telemetry::standAlonePrint(bool standAloneUpdate)
     }
 }
 
+/**
+ * @brief Initializes the telemetry system and runs either standalone or slave mode.
+ * 
+ * @param forceStandAlone Forces standalone mode if true.
+ * @param buttonHubAddr Address for the button hub.
+ * @param fsrAddr Address for the FSR.
+ * @param vibrationMotorAddress Address for vibration motor.
+ * @param useRgb Flag to determine if RGB device is used.
+ */
 void M5Telemetry::run(bool forceStandAlone, uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibrationMotorAddress, bool useRgb)
 {
     M5Tel.scan(buttonHubAddr, fsrAddr, vibrationMotorAddress, useRgb);
@@ -277,6 +286,10 @@ void M5Telemetry::run(bool forceStandAlone, uint8_t buttonHubAddr, uint8_t fsrAd
     }
 }
 
+/**
+ * @brief Slave handler function that receives and processes commands.
+ * @details Handles incoming serial commands and dispatches the appropriate response.
+ */
 void M5Telemetry::slaveHandler()
 {
     uint32_t commandValue;
@@ -291,10 +304,10 @@ void M5Telemetry::slaveHandler()
         switch((Commands_e)commandValue)
         {
             case COMMAND_RUN_SENSORS:
-                runCommand(commandHandler.bufferToUint32(RxBuffer + 8));
+                runCommand();
                 break;
             case COMMAND_RESCAN_SENSORS:
-                rescanCommand(commandHandler.bufferToUint32(RxBuffer + 8), commandHandler.bufferToUint32(RxBuffer + 12), commandHandler.bufferToUint32(RxBuffer + 16), commandHandler.bufferToUint32(RxBuffer + 20));
+                rescanCommand();
                 break;
             default:
                 M5.Lcd.fillScreen(BLACK);
@@ -308,21 +321,42 @@ void M5Telemetry::slaveHandler()
     }
 }
 
-void M5Telemetry::runCommand(uint32_t bitmap)
+/**
+ * @brief Processes the 'run sensors' command.
+ * @details Handles the request to activate specific sensors and retrieve their data.
+ */
+void M5Telemetry::runCommand()
 {
+    uint32_t bitmap = commandHandler.bufferToUint32(RxBuffer + 8);
+
     M5.Lcd.printf("Received bitmap of devices 0x%X\n", bitmap);
 
     commandHandler.txNumOfBytes = 0;
     for(uint8_t deviceId = 0; deviceId < (uint8_t)DEVICE_MAX_DEVICES; deviceId++)
     {
+        // Determine that device was requested and exsists in system
         if (bitmap & (1 << deviceId))
         {
+            if(pDeviceHandlers[deviceId] == NULL)
+            {
+                M5.Lcd.printf("ASSERT! Requested data from unconnected Device reboot system!");
+                while(1) {}
+            }
             commandHandler.txNumOfBytes += pDeviceHandlers[deviceId]->writeIntoTxBuffer(commandHandler.txNumOfBytes);
         }
     }
 }
 
-void M5Telemetry::rescanCommand(uint32_t buttonHubAddr, uint32_t fsrAddr, uint32_t vibrationMotorAddress, uint32_t useRgb)
+/**
+ * @brief Processes the 'rescan sensors' command.
+ * @details Rescans the connected devices based on provided parameters.
+ */
+void M5Telemetry::rescanCommand()
 {
-    M5Tel.scan(buttonHubAddr, fsrAddr, vibrationMotorAddress, useRgb);
+    uint8_t buttonHubAddr      = commandHandler.bufferToUint32(RxBuffer + 8);
+    uint8_t fsrAddr            = commandHandler.bufferToUint32(RxBuffer + 12);
+    uint8_t vibrationMotorAddr = commandHandler.bufferToUint32(RxBuffer + 16);
+    bool    useRgb             = commandHandler.bufferToUint32(RxBuffer + 20);
+
+    M5Tel.scan(buttonHubAddr, fsrAddr, vibrationMotorAddr, useRgb);
 }

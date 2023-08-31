@@ -8,7 +8,7 @@ root_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../")
 sys.path.append(root_path)
 
 # Import necessary modules and classes from the CLI package.
-from CLI.Assets.CommandHandler import CommandHandler
+from CLI.Assets.CommandHandler import CommandHandler, PbHubPortAddr_e
 from CLI.Devices.DeviceAbs import Device_e
 from CLI.Devices.Fsr import Fsr
 from CLI.Devices.Imu import Imu
@@ -68,3 +68,10 @@ class M5Telemetry:
 
             # Reduce the remaining size of the data stream.
             size -= temp_size + 4
+
+    def rescan(self, button_pb_hub_addr: PbHubPortAddr_e, fsr_pb_hub_addr: PbHubPortAddr_e = PbHubPortAddr_e.PORT_1,
+               vibration_motor_pb_hub_addr: PbHubPortAddr_e = PbHubPortAddr_e.PORT_2,
+               is_rgb_connected: bool = True):
+        self.__command_handler.command_rescan_sensors(button_pb_hub_addr, fsr_pb_hub_addr, vibration_motor_pb_hub_addr,
+                                                      is_rgb_connected)
+        print("rescanned devices successfully !")

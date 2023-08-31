@@ -41,7 +41,6 @@ class CommandHandler
 
     private:
         RunningMode_e           connectionType;
-        bool                    canReadBuffer;
 };
 
 extern byte           RxBuffer[MAX_BUFFER_SIZE];

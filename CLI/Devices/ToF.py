@@ -49,4 +49,4 @@ class ToF(DeviceAbs.DeviceAbs):
         Returns a string representation of the ToF instance as an 8x8 matrix.
         """
         # Convert the matrix to a formatted string
-        return f"ToF distances:\n{np.array2string(self.mm_distances)}"
+        return f"ToF distances[mm] 8x8:\n{np.array2string(self.mm_distances)}"

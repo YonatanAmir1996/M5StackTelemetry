@@ -1,16 +1,26 @@
 #include "CommandHandler.h"
-#include "soc/timer_group_struct.h"
-#include "soc/timer_group_reg.h"
 
-byte          RxBuffer[MAX_BUFFER_SIZE] = {0};
-byte          TxBuffer[MAX_BUFFER_SIZE] = {0};
-CommandHandler commandHandler;
+// Buffer definitions
+byte RxBuffer[MAX_BUFFER_SIZE] = {0};  /**< Receive buffer. */
+byte TxBuffer[MAX_BUFFER_SIZE] = {0};  /**< Transmit buffer. */
+CommandHandler commandHandler;         /**< Command handler instance. */
 
-CommandHandler::CommandHandler() : canReadBuffer(false), rxNumOfBytes(0), txNumOfBytes(0)
+/**
+ * @brief Default constructor that initializes member variables.
+ */
+CommandHandler::CommandHandler() : rxNumOfBytes(0), txNumOfBytes(0)
 {}
 
+/**
+ * @brief Destructor. Currently empty but can be expanded if required in the future.
+ */
 CommandHandler::~CommandHandler() {}
 
+/**
+ * @brief Initialization function to establish a connection.
+ * 
+ * Tries to establish a connection either via USBSerial or WIFI.
+ */
 void CommandHandler::begin() {
   // Try to connect by WIFI/Serial
   if (USBSerial) 
@@ -20,40 +30,48 @@ void CommandHandler::begin() {
   } 
   else
   {
-      // WIFI NOT SUPPORTED YET !
-      // connectionType = RUNNING_MODE_WIFI;
-      // Try to connect if fails change connection type to RUNNING_MODE_STANDALONE(which equivalents to failure in connection)
-      connectionType = RUNNING_MODE_STANDALONE;
+     // WIFI connection is currently not supported
+      connectionType = RUNNING_MODE_STANDALONE;  // Fallback to standalone mode
   }
 }
 
+/**
+ * @brief Checks if there's an active connection.
+ * 
+ * @return Returns true if connected, otherwise false.
+ */
 bool CommandHandler::isConnected() {
   return (connectionType != RUNNING_MODE_STANDALONE);
 }
 
+/**
+ * @brief Transmit data over Serial.
+ */
 void CommandHandler::txSerial() {
     uint32_t remainedBytes = 4;
     // Clean Rx Buffer
     rxNumOfBytes = 0;
 
-    // Send number of bytes that will be sent
+     // Transmit the number of bytes that will be sent
     while (remainedBytes)
     {
         remainedBytes -= USBSerial.write((byte*)&txNumOfBytes, remainedBytes);
     }
-    USBSerial.flush();
+
+     // Transmit the actual data
     remainedBytes = txNumOfBytes;
     while (remainedBytes)
     {
         remainedBytes -= USBSerial.write(TxBuffer + (txNumOfBytes - remainedBytes), remainedBytes);
     }
-    USBSerial.flush();
+
+    // Reset the Tx buffer counter
     txNumOfBytes = 0;
-    // Clean TX buffer
-    canReadBuffer = false; // Waiting for data
 }
 
-
+/**
+ * @brief Receive data from Serial.
+ */
 void CommandHandler::rxSerial() 
 {
     M5.Lcd.fillScreen(BLACK);
@@ -62,17 +80,24 @@ void CommandHandler::rxSerial()
     /* Main handler */
     M5.Lcd.println("Pending for master command");
 
+     // Wait until data is available
     while(!USBSerial.available())
     {
         delay(10);
     } 
 
-    /* Read rx */
+     // Read the incoming data
     USBSerial.readBytes(RxBuffer, 4);
     commandHandler.rxNumOfBytes = commandHandler.bufferToUint32(RxBuffer);
     USBSerial.readBytes((RxBuffer + 4), commandHandler.rxNumOfBytes);
 }
 
+/**
+ * @brief Convert a 4-byte buffer into a uint32_t value.
+ * 
+ * @param buffer 4-byte array to be converted.
+ * @return Converted uint32_t value.
+ */
 uint32_t CommandHandler::bufferToUint32(const byte* buffer)
 {
      return ((uint32_t)buffer[0] << 24) |  ((uint32_t)buffer[1] << 16) | ((uint32_t)buffer[2] << 8)  | buffer[3];
