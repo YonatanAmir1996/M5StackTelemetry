@@ -2,6 +2,9 @@ import os
 import sys
 import struct
 import time
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.interpolate import RectBivariateSpline
 # Determine the root directory based on the current file's location
 # and append it to the system's path list to ensure correct module imports.
 root_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../")
@@ -19,7 +22,7 @@ from CLI.Devices.HRU import HRU
 
 class M5Telemetry:
 
-    def __init__(self):
+    def __init__(self, plot_amg: bool = False):
         # Create an instance of CommandHandler to handle commands.
         self.__command_handler = CommandHandler()
 
@@ -29,7 +32,6 @@ class M5Telemetry:
         self.tof = ToF()
         self.amg = Amg8833()
         self.hru = HRU()
-
         # Mapping of Device enums to device instances for easy updating of device values.
         self.devices = {
             Device_e.FSR: self.fsr,
@@ -104,3 +106,68 @@ class M5Telemetry:
         """
         self.__command_handler.command_set_motor(duty_cycle)
         time.sleep(0.1)
+
+    def plot_amg(self, plot_delay_in_seconds: float=0.1):
+        """Update the thermal matrix visualization."""
+        # Initialize the plot for thermal matrix visualization
+        fig, ax = plt.subplots()
+        plt.ion()  # Enable interactive mode
+        dummy_data = np.zeros((256, 256))
+        img = ax.imshow(dummy_data, cmap='jet', interpolation='none')
+        cbar = plt.colorbar(img, ax=ax)
+
+        while True:
+            self.update_values(1 << Device_e.AMG833.value)
+            # Get the 8x8 matrix
+            matrix_8x8 = self.amg.pixels
+
+            # Interpolate the 8x8 matrix to a denser 256x256 matrix
+            x = np.linspace(0, 7, 8)
+            y = np.linspace(0, 7, 8)
+            f = RectBivariateSpline(x, y, matrix_8x8)
+            xnew = np.linspace(0, 7, 256)
+            ynew = np.linspace(0, 7, 256)
+            matrix_256x256 = f(xnew, ynew)
+
+            # Update the displayed data with the new matrix
+            img.set_data(matrix_256x256)
+            img.autoscale()
+
+            # Redraw the plot to reflect the changes
+            fig.canvas.draw()
+            plt.pause(plot_delay_in_seconds)  # Add a brief pause
+
+    def plot_tof(self, plot_delay_in_seconds: float = 0.1):
+        """Update the ToF matrix visualization."""
+
+        # Initialize the plot for ToF matrix visualization
+        fig, ax = plt.subplots()
+        plt.ion()  # Enable interactive mode
+
+        # Create dummy data for initializing the visualization
+        dummy_data = np.zeros((256, 256))
+        img = ax.imshow(dummy_data, cmap='hot', interpolation='none')  # using 'hot' colormap here
+        cbar = plt.colorbar(img, ax=ax)
+        cbar.set_label('Distance (mm)')
+
+        while True:
+            # Update ToF sensor values
+            self.update_values(1 << Device_e.TOF.value)
+
+            # Get the 8x8 matrix of ToF distances
+            matrix_8x8 = self.tof.mm_distances
+
+            # Interpolate the 8x8 matrix to a denser 256x256 matrix for visualization
+            x = np.linspace(0, 7, 8)
+            y = np.linspace(0, 7, 8)
+            f = RectBivariateSpline(x, y, matrix_8x8)
+            xnew = np.linspace(0, 7, 256)
+            ynew = np.linspace(0, 7, 256)
+            matrix_256x256 = f(xnew, ynew)
+
+            # Update the displayed data with the new interpolated matrix
+            img.set_data(matrix_256x256)
+            img.autoscale()
+
+            # Pause for a specified delay before updating again
+            plt.pause(plot_delay_in_seconds)
