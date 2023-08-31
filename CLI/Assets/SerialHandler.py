@@ -57,7 +57,7 @@ class SerialHandler:
             while self.__serial.in_waiting < 4:
                 pass
             bytes_to_read = int.from_bytes(self.__serial.read(4), byteorder='little')
-            print(bytes_to_read)
+            # print(bytes_to_read)
             if bytes_to_read:
                 self.__serial.flush()
                 while self.__serial.in_waiting != bytes_to_read:

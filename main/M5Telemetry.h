@@ -25,6 +25,8 @@ class M5Telemetry
         void runCommand();
         void rescanCommand();
         void slaveHandler();
+        void setRgbCommand();
+        void setMotorCommand();
 
     private:
         RunningMode_e       runningMode; 

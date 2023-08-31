@@ -309,6 +309,12 @@ void M5Telemetry::slaveHandler()
             case COMMAND_RESCAN_SENSORS:
                 rescanCommand();
                 break;
+            case COMMAND_SET_RGB:
+                setRgbCommand();
+                break;
+            case COMMAND_SET_MOTOR:
+                setMotorCommand();
+                break;
             default:
                 M5.Lcd.fillScreen(BLACK);
                 M5.Lcd.setCursor(0,0);
@@ -353,10 +359,35 @@ void M5Telemetry::runCommand()
  */
 void M5Telemetry::rescanCommand()
 {
-    uint8_t buttonHubAddr      = commandHandler.bufferToUint32(RxBuffer + 8);
-    uint8_t fsrAddr            = commandHandler.bufferToUint32(RxBuffer + 12);
-    uint8_t vibrationMotorAddr = commandHandler.bufferToUint32(RxBuffer + 16);
+    uint8_t buttonHubAddr      = static_cast<uint8_t>(commandHandler.bufferToUint32(RxBuffer + 8));
+    uint8_t fsrAddr            = static_cast<uint8_t>(commandHandler.bufferToUint32(RxBuffer + 12));
+    uint8_t vibrationMotorAddr = static_cast<uint8_t>(commandHandler.bufferToUint32(RxBuffer + 16));
     bool    useRgb             = commandHandler.bufferToUint32(RxBuffer + 20);
 
     M5Tel.scan(buttonHubAddr, fsrAddr, vibrationMotorAddr, useRgb);
+}
+
+/**
+ * @brief Processes the set rgb command.
+ * @details set RGB unit
+ */
+void M5Telemetry::setRgbCommand()
+{
+    uint8_t id      = static_cast<uint8_t>(commandHandler.bufferToUint32(RxBuffer + 8));
+    uint8_t red     = static_cast<uint8_t>(commandHandler.bufferToUint32(RxBuffer + 12));
+    uint8_t green   = static_cast<uint8_t>(commandHandler.bufferToUint32(RxBuffer + 16));
+    uint8_t blue    = static_cast<uint8_t>(commandHandler.bufferToUint32(RxBuffer + 20));
+
+    RGBDevice.SetRGB(id, red, green, blue);
+}
+
+/**
+ * @brief Processes the set motor command.
+ * @details set duty cycle of motor unit
+ */
+void M5Telemetry::setMotorCommand()
+{
+    uint8_t dutyCycle = static_cast<uint8_t>(commandHandler.bufferToUint32(RxBuffer + 8));
+
+    vibrationMotor.setMotor(dutyCycle);
 }

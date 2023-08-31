@@ -1,4 +1,5 @@
 #include "RGB.h"
+#include <M5CoreS3.h>
 
 #define PIN       9
 #define NUMPIXELS 3
@@ -9,9 +10,8 @@ RGB RGBDevice;
  * @brief Default constructor for the RGB class.
  * @details Not used yet.
  */
-RGB::RGB()
+RGB::RGB() : isConnected(false)
 {
-   
 }
 
 /**
@@ -21,9 +21,17 @@ RGB::RGB()
  */
 bool RGB::begin()
 {
-    pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
-    isConnected = true;
+    if(isConnected)
+    {
+        pixels.clear();
+    }
+    else
+    {
+        M5.Axp.powerModeSet(POWER_MODE_USB_IN_BUS_OUT);
+        pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+    }
     pixels.begin();
+    isConnected = true;
     return true;
 }
 
@@ -43,9 +51,9 @@ RGB::~RGB() {}
  */
 void RGB::SetRGB(uint8_t id, uint8_t red, uint8_t green, uint8_t blue)
 {
-    if (isConnected)
+    if(isConnected)
     {
         pixels.setPixelColor(id, pixels.Color(red, green, blue));
-        pixels.show(); 
+        pixels.show();
     }
 }
