@@ -105,15 +105,17 @@ class M5Telemetry:
         :return:
         """
         self.__command_handler.command_set_motor(duty_cycle)
+        print(f"set motor with duty cycle of {duty_cycle}")
         time.sleep(0.1)
 
-    def plot_amg(self, plot_delay_in_seconds: float=0.1):
+    def plot_amg(self, plot_delay_in_seconds: float = 0.1, min_temprature_show: int = 20, max_temprature_show:int = 100,
+                 auto_scale:bool = False):
         """Update the thermal matrix visualization."""
         # Initialize the plot for thermal matrix visualization
         fig, ax = plt.subplots()
         plt.ion()  # Enable interactive mode
         dummy_data = np.zeros((256, 256))
-        img = ax.imshow(dummy_data, cmap='jet', interpolation='none')
+        img = ax.imshow(dummy_data, cmap='jet', interpolation='none', vmin=min_temprature_show, vmax=max_temprature_show)
         cbar = plt.colorbar(img, ax=ax)
 
         while True:
@@ -131,13 +133,15 @@ class M5Telemetry:
 
             # Update the displayed data with the new matrix
             img.set_data(matrix_256x256)
-            img.autoscale()
+            if auto_scale:
+                img.autoscale()
 
             # Redraw the plot to reflect the changes
             fig.canvas.draw()
             plt.pause(plot_delay_in_seconds)  # Add a brief pause
 
-    def plot_tof(self, plot_delay_in_seconds: float = 0.1):
+    def plot_tof(self, plot_delay_in_seconds: float = 0.1, min_distance_in_mm: int = 0, max_distance_in_mm: int = 4000,
+                 auto_scale:bool = False):
         """Update the ToF matrix visualization."""
 
         # Initialize the plot for ToF matrix visualization
@@ -146,7 +150,7 @@ class M5Telemetry:
 
         # Create dummy data for initializing the visualization
         dummy_data = np.zeros((256, 256))
-        img = ax.imshow(dummy_data, cmap='hot', interpolation='none')  # using 'hot' colormap here
+        img = ax.imshow(dummy_data, cmap='hot', interpolation='none', vmin=min_distance_in_mm, vmax=max_distance_in_mm)  # using 'hot' colormap here
         cbar = plt.colorbar(img, ax=ax)
         cbar.set_label('Distance (mm)')
 
@@ -167,7 +171,8 @@ class M5Telemetry:
 
             # Update the displayed data with the new interpolated matrix
             img.set_data(matrix_256x256)
-            img.autoscale()
+            if auto_scale:
+                img.autoscale()
 
             # Pause for a specified delay before updating again
             plt.pause(plot_delay_in_seconds)

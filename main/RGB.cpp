@@ -55,5 +55,6 @@ void RGB::SetRGB(uint8_t id, uint8_t red, uint8_t green, uint8_t blue)
     {
         pixels.setPixelColor(id, pixels.Color(red, green, blue));
         pixels.show();
+        delay(200);
     }
 }
