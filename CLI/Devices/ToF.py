@@ -16,37 +16,35 @@ import CLI.Devices.DeviceAbs as DeviceAbs
 
 
 class ToF(DeviceAbs.DeviceAbs):
-    """
-    Represents a Time-of-Flight (ToF) device.
-    """
 
     # Number of pixels for the ToF sensor
     tof_num_of_pixels = 64
+    history_length = 100  # For example, adjust as needed
 
     def __init__(self):
-        """
-        Initialize the ToF device.
-        """
-        # Initialize the base class
         super().__init__(DeviceAbs.Device_e.TOF)
-
-        # Initialize the mm_distances as an 8x8 numpy matrix filled with zeros
         self.mm_distances = np.zeros((8, 8), dtype=np.uint16)
+        # Initialize history as a list
+        self.mm_distances_history = []
+        # Initialize the average matrix
+        self.mm_distances_avg = np.zeros((8, 8), dtype=np.float64)
 
     def set(self, data: bytes):
-        """
-        Set the distance values by unpacking a given byte sequence.
-
-        Args:
-            data (bytes): The byte sequence containing the ToF data.
-        """
-        # Unpack the byte sequence as 64 Little Endian 16-bit unsigned integers,
-        # reshape it to a 8x8 matrix, and store in mm_distances
+        # Update mm_distances as before
         self.mm_distances = np.array(struct.unpack(f"<{ToF.tof_num_of_pixels}H", data)).reshape(8, 8)
 
+        # Avoid zero distances to prevent issues with the geometric mean
+        self.mm_distances = np.where(self.mm_distances == 0, 1e-12, self.mm_distances)
+
+        # Append the current matrix to the history
+        self.mm_distances_history.append(self.mm_distances)
+
+        # Keep only the last 'history_length' matrices
+        while len(self.mm_distances_history) > ToF.history_length:
+            self.mm_distances_history.pop(0)
+
+        # Compute the average matrix
+        self.mm_distances_avg = np.mean(self.mm_distances_history, axis=0)
+
     def __str__(self):
-        """
-        Returns a string representation of the ToF instance as an 8x8 matrix.
-        """
-        # Convert the matrix to a formatted string
         return f"ToF distances[mm] 8x8:\n{np.array2string(self.mm_distances)}"

@@ -14,7 +14,7 @@ class RGB: public DeviceAbs
         void SetRGB(uint8_t id, uint8_t red, uint8_t green, uint8_t blue);
     private:
         Adafruit_NeoPixel pixels;
-        uint8_t isConnected;
+        bool isConnected;
 
 };
 
