@@ -6,9 +6,10 @@ import sys
 root_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../")
 sys.path.append(root_path)
 import CLI.Assets.CommonMethods as CommonMethods
+from CLI.Assets.AbsHandler import AbsHandler
 
 
-class SerialHandler:
+class SerialHandler(AbsHandler):
     # Define constants for the USB device's vendor and product ID.
     pid = 0x1001
     vid = 0x303a
@@ -37,10 +38,6 @@ class SerialHandler:
         self.connect()
 
     def connect(self):
-        """
-        Attempts to establish a serial connection.
-        :return: Boolean indicating the status of the connection.
-        """
         # If no matching COM port is found, return False.
         if self.__comport is None:
             ret_val = False
@@ -55,13 +52,7 @@ class SerialHandler:
         """Close the serial connection."""
         self.__serial.close()
 
-    def write(self, data):
-        """
-        Send data to the serial device.
-        :param data: The data in hex format to be sent.
-        :return: Bytes received from the device after writing.
-        """
-
+    def write_and_read(self, data):
         # Check if the serial connection is active and if the provided data is in a valid hex format.
         if self.__serial.is_open and CommonMethods.is_valid_hex_array(data):
             # Convert the hex data to bytes.

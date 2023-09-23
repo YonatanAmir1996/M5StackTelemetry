@@ -24,7 +24,7 @@ class ToFVisualizer:
 
         self.interface = M5Telemetry()
         self.root = tk.Tk()
-        self.root.title("ToF presenter")
+        self.root.title("ToF GUI")
         self.root.geometry('450x800')
         self.root.configure(bg="#f0f0f0")
 
@@ -82,7 +82,7 @@ class ToFVisualizer:
 
     def sample_tof(self):
         with threading.Lock():
-            self.interface.update_values(1 << Device_e.TOF.value)
+            self.interface.update_values([Device_e.TOF])
 
     def has_large_connected_area(self, matrix, threshold):
         binary_matrix = np.where(matrix < threshold, 1, 0)
