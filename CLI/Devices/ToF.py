@@ -24,6 +24,7 @@ class ToF(DeviceAbs.DeviceAbs):
     def __init__(self):
         super().__init__(DeviceAbs.Device_e.TOF)
         self.mm_distances = np.zeros((8, 8), dtype=np.uint16)
+        self.temp_mm_distances = np.zeros((8, 8), dtype=np.uint16)
         # Initialize history as a list
         self.mm_distances_history = []
         # Initialize the average matrix
@@ -34,10 +35,10 @@ class ToF(DeviceAbs.DeviceAbs):
         self.mm_distances = np.array(struct.unpack(f"<{ToF.tof_num_of_pixels}H", data)).reshape(8, 8)
 
         # Avoid zero distances to prevent issues with the geometric mean
-        self.mm_distances = np.where(self.mm_distances == 0, 1e-12, self.mm_distances)
+        self.temp_mm_distances = np.where(self.mm_distances == 0, 1e-12, self.mm_distances)
 
         # Append the current matrix to the history
-        self.mm_distances_history.append(self.mm_distances)
+        self.mm_distances_history.append(self.temp_mm_distances)
 
         # Keep only the last 'history_length' matrices
         while len(self.mm_distances_history) > ToF.history_length:

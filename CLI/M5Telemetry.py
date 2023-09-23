@@ -44,7 +44,10 @@ class M5Telemetry:
     def disconnect(self):
         self.__command_handler.disconnect()
 
-    def update_values(self, sensor_bitmap):
+    def update_values(self, sensors_list: list):
+        sensor_bitmap = 0
+        for device in sensors_list:
+            sensor_bitmap |= 1 << device.value
         # Get raw data stream for sensors based on the provided sensor_bitmap.
         data_stream = self.__command_handler.command_run_sensors(sensor_bitmap)
 
@@ -71,7 +74,8 @@ class M5Telemetry:
             # Reduce the remaining size of the data stream.
             size -= temp_size + 4
 
-    def rescan(self, button_pb_hub_addr: PbHubPortAddr_e, fsr_pb_hub_addr: PbHubPortAddr_e = PbHubPortAddr_e.PORT_1,
+    def rescan(self, button_pb_hub_addr: PbHubPortAddr_e,
+               fsr_pb_hub_addr: PbHubPortAddr_e = PbHubPortAddr_e.PORT_1,
                vibration_motor_pb_hub_addr: PbHubPortAddr_e = PbHubPortAddr_e.PORT_2,
                is_rgb_connected: bool = True):
         """
@@ -119,7 +123,7 @@ class M5Telemetry:
         cbar = plt.colorbar(img, ax=ax)
 
         while True:
-            self.update_values(1 << Device_e.AMG833.value)
+            self.update_values([Device_e.AMG833])
             # Get the 8x8 matrix
             matrix_8x8 = self.amg.pixels
 
@@ -156,7 +160,7 @@ class M5Telemetry:
 
         while True:
             # Update ToF sensor values
-            self.update_values(1 << Device_e.TOF.value)
+            self.update_values([Device_e.TOF])
 
             # Get the 8x8 matrix of ToF distances
             matrix_8x8 = self.tof.mm_distances

@@ -11,17 +11,18 @@ from CLI.Assets.CommandHandler import PbHubPortAddr_e
 
 if __name__ == '__main__':
     interface = M5Telemetry()
-    interface.rescan(PbHubPortAddr_e.PORT_0, PbHubPortAddr_e.PORT_5, PbHubPortAddr_e.PORT_3, True)
+    interface.rescan(button_pb_hub_addr=PbHubPortAddr_e.PORT_0,
+                     fsr_pb_hub_addr=PbHubPortAddr_e.PORT_5,
+                     vibration_motor_pb_hub_addr=PbHubPortAddr_e.PORT_3,
+                     is_rgb_connected=False)
+
     while True:
-        for i in range(10):
-            sensor_bmp = 1 << Device_e.TOF.value | 1 << Device_e.IMU.value | 1 << Device_e.FSR.value
-            print(f"{sensor_bmp:X}")
-            interface.update_values(sensor_bmp)
-            print(interface.fsr)
-            print(interface.imu)
-            print(interface.amg)
-            print(interface.tof)
-            time.sleep(5)
+        interface.update_values([Device_e.TOF, Device_e.IMU, Device_e.FSR, Device_e.AMG833])
+        print(interface.fsr)
+        print(interface.imu)
+        print(interface.amg)
+        print(interface.tof)
+        time.sleep(1)
 
 
 
