@@ -3,9 +3,22 @@
 #include "PbHubDevice.h"
 #include "RGB.h"
 #include "Vibration.h"
+
 #include "CommandHandler.h"
 
 M5Telemetry M5Tel; // Global external instance of M5Telemetry
+
+// Define function signatures
+typedef void (*CallbackFunction)();
+
+CallbackFunction commandLookupTable[] = 
+{
+    [COMMAND_RESCAN_SENSORS] = rescanCommand,  
+    [COMMAND_RUN_SENSORS]    = runCommand,     
+    [COMMAND_SET_RGB]        = setRgbCommand,  
+    [COMMAND_SET_MOTOR]      = setMotorCommand,
+    [COMMAND_SET_SPEAKER]    = setSpeaker
+};
 
 /** 
  * @brief Default constructor for M5Telemetry.
@@ -89,7 +102,7 @@ void M5Telemetry::scanPaHub()
  * @param useRgb flag if use RGB device.
  * @details This function scans both internal and external devices, initializing and mapping them.
  */
-void M5Telemetry::scan(uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibrationMotorAddress, bool useRgb)
+void M5Telemetry::scan(uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibrationMotorAddress, uint8_t speakerAddress, bool useRgb)
 {
     PaHubPort_e        tempPort;
     PaHubDeviceAbs     *pPaHubDeviceHandler;
@@ -162,7 +175,7 @@ void M5Telemetry::scan(uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibration
     M5.Lcd.println("Button initialized");
     button.begin(buttonHubAddr); 
 
-    // Outputs
+    // Port B outputs
     if (useRgb)
     {
         M5.Lcd.println("RGB initialized");
@@ -170,13 +183,20 @@ void M5Telemetry::scan(uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibration
         RGBDevice.begin();
     }
 
+    // PB HUB Outputs
     if (PB_HUB_PORT_INVALID_ADDR != vibrationMotorAddress)
     {
         M5.Lcd.println("Vibration motor initialized");
-        // PB-HUB
         vibrationMotor.begin(vibrationMotorAddress);
     }
-    delay(2500);
+
+    if (PB_HUB_PORT_INVALID_ADDR != speakerAddress)
+    {
+        M5.Lcd.println("Speaker initialized");
+        speaker.begin(speakerAddress);
+    }
+
+    delay(3000);
 }
 
 
@@ -273,9 +293,9 @@ void M5Telemetry::standAlonePrint(bool standAloneUpdate)
  * @param vibrationMotorAddress Address for vibration motor.
  * @param useRgb Flag to determine if RGB device is used.
  */
-void M5Telemetry::run(bool forceStandAlone, uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibrationMotorAddress, bool useRgb)
+void M5Telemetry::run(bool forceStandAlone, uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibrationMotorAddress, uint8_t speakerAddress, bool useRgb)
 {
-    M5Tel.scan(buttonHubAddr, fsrAddr, vibrationMotorAddress, useRgb);
+    M5Tel.scan(buttonHubAddr, fsrAddr, vibrationMotorAddress, speakerAddress, useRgb);
     if((false == forceStandAlone) && (true == commandHandler.isConnected()))
     {
         slaveHandler();
@@ -301,21 +321,13 @@ void M5Telemetry::slaveHandler()
         commandValue = commandHandler.bufferToUint32(RxBuffer + 4); // Assumption the 5-8 bytes holds command name
         M5.Lcd.printf("Received command Id %u\n", commandValue);
         // Run command
-        switch((Commands_e)commandValue)
+        if(commandValue < COMMAND_MAX_COMMANDS)
         {
-            case COMMAND_RUN_SENSORS:
-                runCommand();
-                break;
-            case COMMAND_RESCAN_SENSORS:
-                rescanCommand();
-                break;
-            case COMMAND_SET_RGB:
-                setRgbCommand();
-                break;
-            case COMMAND_SET_MOTOR:
-                setMotorCommand();
-                break;
-            default:
+            commandLookupTable[(uint8_t)commandValue]();
+             commandHandler.txSerial();
+        }
+        else
+        {
                 M5.Lcd.fillScreen(BLACK);
                 M5.Lcd.setCursor(0,0);
                 M5.Lcd.setTextFont(2);
@@ -323,7 +335,6 @@ void M5Telemetry::slaveHandler()
                 while(1) {}
                 break;
         }
-        commandHandler.txSerial();
     }
 }
 
@@ -362,9 +373,10 @@ void M5Telemetry::rescanCommand()
     uint8_t buttonHubAddr      = static_cast<uint8_t>(commandHandler.bufferToUint32(RxBuffer + 8));
     uint8_t fsrAddr            = static_cast<uint8_t>(commandHandler.bufferToUint32(RxBuffer + 12));
     uint8_t vibrationMotorAddr = static_cast<uint8_t>(commandHandler.bufferToUint32(RxBuffer + 16));
-    bool    useRgb             = commandHandler.bufferToUint32(RxBuffer + 20);
+    uint8_t speakerAddress     = static_cast<uint8_t>(commandHandler.bufferToUint32(RxBuffer + 20));
+    bool    useRgb             = commandHandler.bufferToUint32(RxBuffer + 24);
 
-    M5Tel.scan(buttonHubAddr, fsrAddr, vibrationMotorAddr, useRgb);
+    M5Tel.scan(buttonHubAddr, fsrAddr, vibrationMotorAddr, speakerAddress, useRgb);
 }
 
 /**
@@ -387,7 +399,14 @@ void M5Telemetry::setRgbCommand()
  */
 void M5Telemetry::setMotorCommand()
 {
-    uint8_t dutyCycle = static_cast<uint8_t>(commandHandler.bufferToUint32(RxBuffer + 8));
+    vibrationMotor.setMotor(static_cast<uint8_t>(commandHandler.bufferToUint32(RxBuffer + 8)));
+}
 
-    vibrationMotor.setMotor(dutyCycle);
+/**
+ * @brief Set / clear speaker
+ * @details Set or clear speaker.
+ */
+void M5Telemetry::setSpeaker()
+{
+    speaker.setSpeaker(static_cast<bool>(commandHandler.bufferToUint32(RxBuffer + 8)));
 }

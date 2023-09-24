@@ -61,3 +61,15 @@ void PbHubDevice::setPwm(uint8_t addr, uint8_t dutyCycle)
         Wire.endTransmission();
     }
 }
+
+void PbHubDevice::setDigitalWrite0(uint8_t addr, uint8_t value)
+{
+    switchPort();
+    if (PB_HUB_PORT_INVALID_ADDR != addr)
+    {
+        Wire.beginTransmission(getBaseAddr());
+        Wire.write(addr | 0x00);
+        Wire.write(value & 0xff);
+        Wire.endTransmission();
+    }
+}

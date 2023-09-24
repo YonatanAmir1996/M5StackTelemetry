@@ -14,6 +14,7 @@ void loop()
         PB_HUB_PORT_0_ADDR, // Button PbHub address
         PB_HUB_PORT_1_ADDR, // FSR PbHub address
         PB_HUB_PORT_3_ADDR, // Vibration Motor PbHub address
+        PB_HUB_PORT_5_ADDR, // speaker Address
         true                // use RGB device(Supported only in PORT B)
         );
 }

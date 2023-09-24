@@ -5,6 +5,7 @@
 #include "HeartRateSensor.h"
 #include "Amg8833.h"
 #include "ToF.h"
+#include "Speaker.h"
 #include "Button.h"
 #include "ForceResistorSensor.h"
 
@@ -16,10 +17,10 @@ class M5Telemetry
         ~M5Telemetry(); 
         void begin(); 
         void standAlonePrint(bool standAloneUpdate);
-        void scan(uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibrationMotorAddress, bool useRgb);
+        void scan(uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibrationMotorAddress, uint8_t speakerAddress, bool useRgb);
         void update();
         void scanPaHub();
-        void run(bool forceStandAlone, uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibrationMotorAddress, bool useRgb);   
+        void run(bool forceStandAlone, uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibrationMotorAddress, uint8_t speakerAddress, bool useRgb);   
 
     private:
         void runCommand();
@@ -27,6 +28,7 @@ class M5Telemetry
         void slaveHandler();
         void setRgbCommand();
         void setMotorCommand();
+        void setSpeaker();
 
     private:
         RunningMode_e       runningMode; 
@@ -38,6 +40,7 @@ class M5Telemetry
         PaHubPort_e         i2cAddrToPortMap[MAX_I2C_ADDR]; // Mapping between I2C address to the port it is connected
         Button              button;
         ForceResistorSensor fsr;
+        Speaker             speaker;
         uint32_t            supportedBitmap;
 };
 
