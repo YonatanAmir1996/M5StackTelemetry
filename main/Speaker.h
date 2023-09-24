@@ -13,7 +13,7 @@ class Speaker: public DeviceAbs
     public:
         Speaker();
         bool begin(uint8_t hubAddr) override;
-        void setSpeaker(bool setOrClear);
+        void setSpeaker();
     private:
         uint8_t hubAddr;
 };

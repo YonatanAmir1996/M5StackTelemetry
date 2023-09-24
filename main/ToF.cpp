@@ -96,11 +96,17 @@ void ToF::print()
 
 uint32_t ToF::writeIntoTxBuffer(uint32_t offset)
 {
-    uint32_t  deviceName = DEVICE_VL3L5CX_TOF;
+    uint32_t  deviceName             = DEVICE_VL3L5CX_TOF;
     uint32_t  deviceNumOfBytesToRead = sizeof(deviceName) + sizeof(measurementData.distance_mm);
+    
+    switchPort();
+    while(!myImager.isDataReady()) 
+    {
+        delay(1);
+    }
+    myImager.getRangingData(&measurementData); // RangingData 
 
-    update();
-
+    
     memcpy(TxBuffer + offset, &deviceNumOfBytesToRead, sizeof(deviceNumOfBytesToRead));
     offset += sizeof(deviceNumOfBytesToRead);
     memcpy(TxBuffer + offset, &deviceName, sizeof(deviceName));

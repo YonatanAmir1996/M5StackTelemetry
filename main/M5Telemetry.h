@@ -8,6 +8,8 @@
 #include "Speaker.h"
 #include "Button.h"
 #include "ForceResistorSensor.h"
+#include <functional> // Needed for std::function and std::bind
+
 
 // Class M5 telemetry
 class M5Telemetry 
@@ -23,9 +25,10 @@ class M5Telemetry
         void run(bool forceStandAlone, uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibrationMotorAddress, uint8_t speakerAddress, bool useRgb);   
 
     private:
+        void slaveHandler();
+
         void runCommand();
         void rescanCommand();
-        void slaveHandler();
         void setRgbCommand();
         void setMotorCommand();
         void setSpeaker();
@@ -42,6 +45,7 @@ class M5Telemetry
         ForceResistorSensor fsr;
         Speaker             speaker;
         uint32_t            supportedBitmap;
+        std::function<void()> commandLookupTable[COMMAND_MAX_COMMANDS];
 };
 
 extern M5Telemetry M5Tel;

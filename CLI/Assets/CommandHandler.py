@@ -16,6 +16,7 @@ class Commands_e(enum.IntEnum):
     COMMAND_RUN_SENSORS = 1
     COMMAND_SET_RGB = 2
     COMMAND_SET_MOTOR = 3
+    COMMAND_SET_SPEAKER = 4
 
 
 class PbHubPortAddr_e(enum.IntEnum):
@@ -39,37 +40,6 @@ class CommandHandler:
 
     def disconnect(self):
         self.__handler.disconnect()
-
-    def command_run_sensors(self, sensors_bmp: int):
-        """
-        :param   sensors_bmp: sensors bitmap according to DeviceName_e enum
-        :return:
-        """
-        if not isinstance(sensors_bmp, int):
-            raise TypeError("Please use int type only !")
-        return self.send_command(Commands_e.COMMAND_RUN_SENSORS, sensors_bmp)
-
-    def command_rescan_sensors(self, button_pb_hub_addr: PbHubPortAddr_e, fsr_pb_hub_addr: PbHubPortAddr_e,
-                               vibration_motor_pb_hub_addr: PbHubPortAddr_e, is_rgb_connected: bool):
-        return self.send_command(Commands_e.COMMAND_RESCAN_SENSORS, button_pb_hub_addr.value, fsr_pb_hub_addr.value,
-                                 vibration_motor_pb_hub_addr.value, is_rgb_connected)
-
-    def command_set_rgb(self, id: int, red: int, green: int, blue: int):
-        """
-        set RGB colors
-        :param id: led ID
-        :param red:
-        :param green:
-        :param blue:
-        """
-        return self.send_command(Commands_e.COMMAND_SET_RGB, id, red, green, blue)
-
-    def command_set_motor(self, duty_cycle: int):
-        """
-        set motor duty cycle
-        :param duty_cycle: duty cycle
-        """
-        return self.send_command(Commands_e.COMMAND_SET_MOTOR, duty_cycle)
 
     def send_command(self, command: Commands_e, *args, **kwargs):
         """

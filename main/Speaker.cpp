@@ -30,8 +30,13 @@ bool Speaker::begin(uint8_t addr)
  * @details set - True | clear - False
  */
 
-void Speaker::setSpeaker(bool setOrClear)
+void Speaker::setSpeaker()
 {
-    uint8_t signalValue = setOrClear? 1:0;
-    PbHub.setDigitalWrite0(hubAddr, signalValue);
+    for(uint8_t i = 0; i < 100; i++)
+    {
+        PbHub.setDigitalWrite0(hubAddr, HIGH);
+        delay(1);
+        PbHub.setDigitalWrite0(hubAddr, LOW);
+        delay(1);
+    }
 }

@@ -3,27 +3,22 @@
 #include "PbHubDevice.h"
 #include "RGB.h"
 #include "Vibration.h"
-
 #include "CommandHandler.h"
 
 M5Telemetry M5Tel; // Global external instance of M5Telemetry
 
-// Define function signatures
-typedef void (*CallbackFunction)();
-
-CallbackFunction commandLookupTable[] = 
-{
-    [COMMAND_RESCAN_SENSORS] = rescanCommand,  
-    [COMMAND_RUN_SENSORS]    = runCommand,     
-    [COMMAND_SET_RGB]        = setRgbCommand,  
-    [COMMAND_SET_MOTOR]      = setMotorCommand,
-    [COMMAND_SET_SPEAKER]    = setSpeaker
-};
-
 /** 
  * @brief Default constructor for M5Telemetry.
+ * @details commandLookupTable - lookup table of commands
  */
-M5Telemetry::M5Telemetry() {}
+M5Telemetry::M5Telemetry()
+{
+    commandLookupTable[COMMAND_RESCAN_SENSORS] = std::bind(&M5Telemetry::rescanCommand, this);
+    commandLookupTable[COMMAND_RUN_SENSORS]    = std::bind(&M5Telemetry::runCommand, this);
+    commandLookupTable[COMMAND_SET_RGB]        = std::bind(&M5Telemetry::setRgbCommand, this);
+    commandLookupTable[COMMAND_SET_MOTOR]      = std::bind(&M5Telemetry::setMotorCommand, this);
+    commandLookupTable[COMMAND_SET_SPEAKER]    = std::bind(&M5Telemetry::setSpeaker, this);
+}
 
 /** 
  * @brief Destructor for M5Telemetry.
@@ -347,7 +342,7 @@ void M5Telemetry::runCommand()
     uint32_t bitmap = commandHandler.bufferToUint32(RxBuffer + 8);
 
     M5.Lcd.printf("Received bitmap of devices 0x%X\n", bitmap);
-
+    
     commandHandler.txNumOfBytes = 0;
     for(uint8_t deviceId = 0; deviceId < (uint8_t)DEVICE_MAX_DEVICES; deviceId++)
     {
@@ -374,7 +369,7 @@ void M5Telemetry::rescanCommand()
     uint8_t fsrAddr            = static_cast<uint8_t>(commandHandler.bufferToUint32(RxBuffer + 12));
     uint8_t vibrationMotorAddr = static_cast<uint8_t>(commandHandler.bufferToUint32(RxBuffer + 16));
     uint8_t speakerAddress     = static_cast<uint8_t>(commandHandler.bufferToUint32(RxBuffer + 20));
-    bool    useRgb             = commandHandler.bufferToUint32(RxBuffer + 24);
+    bool    useRgb             = static_cast<bool>(commandHandler.bufferToUint32(RxBuffer + 24));
 
     M5Tel.scan(buttonHubAddr, fsrAddr, vibrationMotorAddr, speakerAddress, useRgb);
 }
@@ -408,5 +403,5 @@ void M5Telemetry::setMotorCommand()
  */
 void M5Telemetry::setSpeaker()
 {
-    speaker.setSpeaker(static_cast<bool>(commandHandler.bufferToUint32(RxBuffer + 8)));
+    speaker.setSpeaker();
 }
