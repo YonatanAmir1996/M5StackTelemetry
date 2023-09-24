@@ -27,11 +27,13 @@ class M5Telemetry
     private:
         void slaveHandler();
 
+        /* Add new command here !*/
         void runCommand();
         void rescanCommand();
         void setRgbCommand();
         void setMotorCommand();
         void setSpeaker();
+        /* end of commands */
 
     private:
         RunningMode_e       runningMode; 
