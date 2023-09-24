@@ -11,7 +11,7 @@ root_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../")
 sys.path.append(root_path)
 
 # Import necessary modules and classes from the CLI package.
-from CLI.Assets.CommandHandler import CommandHandler, PbHubPortAddr_e
+from CLI.Assets.CommandHandler import CommandHandler, PbHubPortAddr_e, Commands_e
 from CLI.Devices.DeviceAbs import Device_e
 from CLI.Devices.Fsr import Fsr
 from CLI.Devices.Imu import Imu
@@ -49,7 +49,7 @@ class M5Telemetry:
         for device in sensors_list:
             sensor_bitmap |= 1 << device.value
         # Get raw data stream for sensors based on the provided sensor_bitmap.
-        data_stream = self.__command_handler.command_run_sensors(sensor_bitmap)
+        data_stream = self.__command_handler.send_command(Commands_e.COMMAND_RUN_SENSORS, sensor_bitmap)
 
         # Get the total size of the data stream.
         size = len(data_stream)
@@ -74,20 +74,29 @@ class M5Telemetry:
             # Reduce the remaining size of the data stream.
             size -= temp_size + 4
 
+        # Intended sleep to prevent buffer overloading
+        time.sleep(0.01)
+
     def rescan(self, button_pb_hub_addr: PbHubPortAddr_e,
                fsr_pb_hub_addr: PbHubPortAddr_e = PbHubPortAddr_e.PORT_1,
                vibration_motor_pb_hub_addr: PbHubPortAddr_e = PbHubPortAddr_e.PORT_2,
+               speaker_pb_hub_addr: PbHubPortAddr_e = PbHubPortAddr_e.PORT_5,
                is_rgb_connected: bool = True):
         """
         Rescan devices
         :param button_pb_hub_addr: button pb hub addr
         :param fsr_pb_hub_addr:  fsr pb hub addr
         :param vibration_motor_pb_hub_addr:  vibration motor pb hub addr
+        :param speaker_pb_hub_addr: pb hub addr of speaker(active buzzer)
         :param is_rgb_connected: is rgb connected to port B
         :return:
         """
-        self.__command_handler.command_rescan_sensors(button_pb_hub_addr, fsr_pb_hub_addr, vibration_motor_pb_hub_addr,
-                                                      is_rgb_connected)
+        self.__command_handler.send_command(Commands_e.COMMAND_RESCAN_SENSORS,
+                                            button_pb_hub_addr.value,
+                                            fsr_pb_hub_addr.value,
+                                            vibration_motor_pb_hub_addr.value,
+                                            speaker_pb_hub_addr.value,
+                                            is_rgb_connected)
         print("rescanned devices successfully !")
 
     def command_set_rgb(self, id: int = 0, red: int = 0, green: int = 0, blue: int = 0):
@@ -99,7 +108,7 @@ class M5Telemetry:
         :param blue: 0-100
         :return:
         """
-        self.__command_handler.command_set_rgb(id, red, green, blue)
+        self.__command_handler.send_command(Commands_e.COMMAND_SET_RGB, id, red, green, blue)
         time.sleep(0.2)
 
     def command_set_motor(self, duty_cycle: int=50):
@@ -108,8 +117,12 @@ class M5Telemetry:
         :param duty_cycle:
         :return:
         """
-        self.__command_handler.command_set_motor(duty_cycle)
+        self.__command_handler.send_command(Commands_e.COMMAND_SET_MOTOR, duty_cycle)
         print(f"set motor with duty cycle of {duty_cycle}")
+        time.sleep(0.1)
+
+    def command_set_speaker(self, dummy_arg:int = 0):
+        self.__command_handler.send_command(Commands_e.COMMAND_SET_SPEAKER, dummy_arg)
         time.sleep(0.1)
 
     def plot_amg(self, plot_delay_in_seconds: float = 0.1, min_temprature_show: int = 20, max_temprature_show:int = 100,

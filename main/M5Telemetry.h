@@ -5,8 +5,11 @@
 #include "HeartRateSensor.h"
 #include "Amg8833.h"
 #include "ToF.h"
+#include "Speaker.h"
 #include "Button.h"
 #include "ForceResistorSensor.h"
+#include <functional> // Needed for std::function and std::bind
+
 
 // Class M5 telemetry
 class M5Telemetry 
@@ -16,17 +19,19 @@ class M5Telemetry
         ~M5Telemetry(); 
         void begin(); 
         void standAlonePrint(bool standAloneUpdate);
-        void scan(uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibrationMotorAddress, bool useRgb);
+        void scan(uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibrationMotorAddress, uint8_t speakerAddress, bool useRgb);
         void update();
         void scanPaHub();
-        void run(bool forceStandAlone, uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibrationMotorAddress, bool useRgb);   
+        void run(bool forceStandAlone, uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibrationMotorAddress, uint8_t speakerAddress, bool useRgb);   
 
     private:
+        void slaveHandler();
+
         void runCommand();
         void rescanCommand();
-        void slaveHandler();
         void setRgbCommand();
         void setMotorCommand();
+        void setSpeaker();
 
     private:
         RunningMode_e       runningMode; 
@@ -38,7 +43,9 @@ class M5Telemetry
         PaHubPort_e         i2cAddrToPortMap[MAX_I2C_ADDR]; // Mapping between I2C address to the port it is connected
         Button              button;
         ForceResistorSensor fsr;
+        Speaker             speaker;
         uint32_t            supportedBitmap;
+        std::function<void()> commandLookupTable[COMMAND_MAX_COMMANDS];
 };
 
 extern M5Telemetry M5Tel;
