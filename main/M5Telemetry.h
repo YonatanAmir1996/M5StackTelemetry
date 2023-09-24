@@ -33,6 +33,7 @@ class M5Telemetry
         void setRgbCommand();
         void setMotorCommand();
         void setSpeaker();
+        /* end of commands */
 
     private:
         RunningMode_e       runningMode; 
