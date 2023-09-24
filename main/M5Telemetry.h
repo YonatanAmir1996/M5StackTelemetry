@@ -27,6 +27,7 @@ class M5Telemetry
     private:
         void slaveHandler();
 
+        /* Add new command here !*/
         void runCommand();
         void rescanCommand();
         void setRgbCommand();

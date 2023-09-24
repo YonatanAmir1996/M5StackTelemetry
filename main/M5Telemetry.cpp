@@ -320,7 +320,7 @@ void M5Telemetry::slaveHandler()
         if(commandValue < COMMAND_MAX_COMMANDS)
         {
             commandLookupTable[(uint8_t)commandValue]();
-             commandHandler.txSerial();
+            commandHandler.txSerial();
         }
         else
         {
