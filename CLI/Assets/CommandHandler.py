@@ -2,12 +2,16 @@ import enum
 import struct
 import os
 import sys
+
 root_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../")
 sys.path.append(root_path)
 from CLI.Assets.SerialHandler import SerialHandler
 
 
 class Commands_e(enum.IntEnum):
+    """
+    Supported commands. Commands must be aligned Commands_e of main/SharedDefines.h
+    """
     COMMAND_RESCAN_SENSORS = 0
     COMMAND_RUN_SENSORS = 1
     COMMAND_SET_RGB = 2
@@ -27,6 +31,7 @@ class CommandHandler:
     invalid_pb_hub_port = 0xFF
 
     def __init__(self):
+        # TODO: need to Create WIFI Handler
         self.__handler = SerialHandler()
 
         if self.__handler is None:
@@ -35,7 +40,7 @@ class CommandHandler:
     def disconnect(self):
         self.__handler.disconnect()
 
-    def command_run_sensors(self, sensors_bmp:int):
+    def command_run_sensors(self, sensors_bmp: int):
         """
         :param   sensors_bmp: sensors bitmap according to DeviceName_e enum
         :return:
@@ -44,18 +49,29 @@ class CommandHandler:
             raise TypeError("Please use int type only !")
         return self.send_command(Commands_e.COMMAND_RUN_SENSORS, sensors_bmp)
 
-    def command_rescan_sensors(self, button_pb_hub_addr:PbHubPortAddr_e, fsr_pb_hub_addr:PbHubPortAddr_e,
-                               vibration_motor_pb_hub_addr:PbHubPortAddr_e, is_rgb_connected:bool):
+    def command_rescan_sensors(self, button_pb_hub_addr: PbHubPortAddr_e, fsr_pb_hub_addr: PbHubPortAddr_e,
+                               vibration_motor_pb_hub_addr: PbHubPortAddr_e, is_rgb_connected: bool):
         return self.send_command(Commands_e.COMMAND_RESCAN_SENSORS, button_pb_hub_addr.value, fsr_pb_hub_addr.value,
                                  vibration_motor_pb_hub_addr.value, is_rgb_connected)
 
     def command_set_rgb(self, id: int, red: int, green: int, blue: int):
+        """
+        set RGB colors
+        :param id: led ID
+        :param red:
+        :param green:
+        :param blue:
+        """
         return self.send_command(Commands_e.COMMAND_SET_RGB, id, red, green, blue)
 
     def command_set_motor(self, duty_cycle: int):
+        """
+        set motor duty cycle
+        :param duty_cycle: duty cycle
+        """
         return self.send_command(Commands_e.COMMAND_SET_MOTOR, duty_cycle)
 
-    def send_command(self, command : Commands_e, *args, **kwargs):
+    def send_command(self, command: Commands_e, *args, **kwargs):
         """
         Write command in serial/wifi
         :param command: command name
@@ -72,5 +88,4 @@ class CommandHandler:
         for arg in args:
             raw_data += struct.pack(">I", arg)
 
-        return self.__handler.write(f"{total_bytes:08X}".upper() + raw_data.hex().upper())
-
+        return self.__handler.write_and_read(f"{total_bytes:08X}".upper() + raw_data.hex().upper())
