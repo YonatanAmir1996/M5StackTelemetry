@@ -152,12 +152,13 @@ void M5Telemetry::scan(uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibration
     M5.Lcd.printf("Scanning PbHub Decvices...\n");
     PbHub.setPort(i2cAddrToPortMap[PbHub.getBaseAddr()]);
 
-    pDeviceHandlers[DEVICE_FSR402] = static_cast<DeviceAbs*>(&fsr);
+    
 
     // Sensors / Devices
     if(PB_HUB_PORT_INVALID_ADDR != fsrAddr)
     {
-        fsr.begin(fsrAddr);
+        pDeviceHandlers[DEVICE_FSR402] = static_cast<DeviceAbs*>(&fsr);
+        fsr.begin(fsrAddr);      
         M5.Lcd.println("FSR initialized");
     }
 
@@ -342,7 +343,7 @@ void M5Telemetry::runCommand()
     uint32_t bitmap = commandHandler.bufferToUint32(RxBuffer + 8);
 
     M5.Lcd.printf("Received bitmap of devices 0x%X\n", bitmap);
-    
+
     commandHandler.txNumOfBytes = 0;
     for(uint8_t deviceId = 0; deviceId < (uint8_t)DEVICE_MAX_DEVICES; deviceId++)
     {
@@ -369,7 +370,7 @@ void M5Telemetry::rescanCommand()
     uint8_t fsrAddr            = static_cast<uint8_t>(commandHandler.bufferToUint32(RxBuffer + 12));
     uint8_t vibrationMotorAddr = static_cast<uint8_t>(commandHandler.bufferToUint32(RxBuffer + 16));
     uint8_t speakerAddress     = static_cast<uint8_t>(commandHandler.bufferToUint32(RxBuffer + 20));
-    bool    useRgb             = static_cast<bool>(commandHandler.bufferToUint32(RxBuffer + 24));
+    bool    useRgb             = commandHandler.bufferToUint32(RxBuffer + 24);
 
     M5Tel.scan(buttonHubAddr, fsrAddr, vibrationMotorAddr, speakerAddress, useRgb);
 }
@@ -380,12 +381,13 @@ void M5Telemetry::rescanCommand()
  */
 void M5Telemetry::setRgbCommand()
 {
-    uint8_t id      = static_cast<uint8_t>(commandHandler.bufferToUint32(RxBuffer + 8));
-    uint8_t red     = static_cast<uint8_t>(commandHandler.bufferToUint32(RxBuffer + 12));
-    uint8_t green   = static_cast<uint8_t>(commandHandler.bufferToUint32(RxBuffer + 16));
-    uint8_t blue    = static_cast<uint8_t>(commandHandler.bufferToUint32(RxBuffer + 20));
+    uint8_t id    = static_cast<uint8_t>(commandHandler.bufferToUint32(RxBuffer + 8));
+    uint8_t red   = static_cast<uint8_t>(commandHandler.bufferToUint32(RxBuffer + 12));
+    uint8_t green = static_cast<uint8_t>(commandHandler.bufferToUint32(RxBuffer + 16));
+    uint8_t blue  = static_cast<uint8_t>(commandHandler.bufferToUint32(RxBuffer + 20));
 
     RGBDevice.SetRGB(id, red, green, blue);
+
 }
 
 /**

@@ -14,9 +14,11 @@ class ToF: public PaHubDeviceAbs
     public:
         ToF();
         ~ToF();
-        bool begin();
-        void update();
-        void print();
+        bool begin() override;
+        void update() override;
+        void print() override;
+        void shutdown() override;
+        bool restart() override;
         uint32_t writeIntoTxBuffer(uint32_t offset) override;
 
     private:    

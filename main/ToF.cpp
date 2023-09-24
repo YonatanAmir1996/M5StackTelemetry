@@ -2,7 +2,7 @@
 #include "ToF.h"
 
 #define TOF_MAX_ARRAY_SIZE 64
-
+#define TOF_MAX_REPORT_TIME 500
 
 /**
  * @brief Default constructor for the ToF class.
@@ -58,13 +58,36 @@ bool ToF::begin()
  */
 void ToF::update()
 {
+    uint8_t tsLastReport = millis();
+
     switchPort();
-    if (myImager.isDataReady())
+    // while((millis() - tsLastReport) < TOF_MAX_REPORT_TIME) 
+    // {
+    //     if(myImager.isDataReady())
+    //     {
+    //         if(myImager.getRangingData(&measurementData))
+    //         {
+    //             break;
+    //         }
+    //     }
+    // }  
+    if(myImager.isDataReady())
     {
-        myImager.getRangingData(&measurementData); // RangingData
+        myImager.getRangingData(&measurementData);
     }
 }
 
+void ToF::shutdown()
+{
+    switchPort();
+    myImager.setPowerMode(SF_VL53L5CX_POWER_MODE::SLEEP);
+}
+
+bool ToF::restart()
+{
+    shutdown();
+    return myImager.setPowerMode(SF_VL53L5CX_POWER_MODE::WAKEUP);
+}
 
 /**
  * @brief Display the ToF readings.
@@ -99,14 +122,7 @@ uint32_t ToF::writeIntoTxBuffer(uint32_t offset)
     uint32_t  deviceName             = DEVICE_VL3L5CX_TOF;
     uint32_t  deviceNumOfBytesToRead = sizeof(deviceName) + sizeof(measurementData.distance_mm);
     
-    switchPort();
-    while(!myImager.isDataReady()) 
-    {
-        delay(1);
-    }
-    myImager.getRangingData(&measurementData); // RangingData 
-
-    
+    update(); 
     memcpy(TxBuffer + offset, &deviceNumOfBytesToRead, sizeof(deviceNumOfBytesToRead));
     offset += sizeof(deviceNumOfBytesToRead);
     memcpy(TxBuffer + offset, &deviceName, sizeof(deviceName));
