@@ -26,6 +26,7 @@ class PbHubPortAddr_e(enum.IntEnum):
     PORT_3 = 0x70
     PORT_4 = 0x80
     PORT_5 = 0xA0
+    INVALID = 0xFF
 
 
 class CommandHandler:

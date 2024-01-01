@@ -25,11 +25,11 @@ def poll_devices(m5_telemetry_interface: M5Telemetry, to_set: bool):
     print(m5_telemetry_interface.imu)  # Accessing the 'imu' attribute from M5Telemetry object.
     print(m5_telemetry_interface.amg)  # Accessing the 'amg' attribute from M5Telemetry object.
     print(m5_telemetry_interface.tof)  # Accessing the 'tof' attribute from M5Telemetry object.
-
+    print(m5_telemetry_interface.hru)  # Accessing the 'hru' attribute from M5Telemetry object.
     if to_set is True:
         # Setting values on various devices through the M5Telemetry object.
         m5_telemetry_interface.command_set_speaker()
-        m5_telemetry_interface.command_set_rgb(0, 100, 0, 0)
+        m5_telemetry_interface.command_set_rgb(0, 0, 80, 0)
         m5_telemetry_interface.command_set_motor(50)
     else:
         # Resetting RGB and motor values to default through the M5Telemetry object.
