@@ -45,7 +45,7 @@ class SerialHandler(AbsHandler):
             # Attempt to open the serial connection.
             self.__serial.open()
             ret_val = self.__serial.is_open  # Check if the connection is open.
-            print(f"connected to device {ret_val}")
+            print(f"connected to device via serial: {ret_val}")
         return ret_val
 
     def disconnect(self):

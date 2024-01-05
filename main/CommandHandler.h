@@ -1,9 +1,10 @@
 #ifndef COMMAND_HANDLER_H
 #define COMMAND_HANDLER_H
 
+#include <M5CoreS3.h>
 #include "SharedDefines.h"
 #include <stdint.h>
-#include <M5CoreS3.h>
+
 
 #define MAX_ARGUMENTS 10
 #define MAX_BUFFER_SIZE 1024 * 2 // 10 KB buffer
@@ -23,15 +24,19 @@ typedef struct
 
 class CommandHandler 
 {
-
+    private:
+        void txSerial();
+        void rxSerial();
+        void txWifi();
+        void rxWifi();
+        
     public:
         CommandHandler();
         ~CommandHandler();
 
-        bool isConnected();
-        void begin();
-        void txSerial();
-        void rxSerial();   
+        uint8_t  begin();
+        void     txSlave();
+        void     rxSlave();   
         uint32_t bufferToUint32(const byte* buffer);
   
 

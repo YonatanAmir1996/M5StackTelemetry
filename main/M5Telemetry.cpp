@@ -40,9 +40,6 @@ void M5Telemetry::begin()
     {
         pDeviceHandlers[i] = NULL;
     }
-
-    // CLI handler begin
-    commandHandler.begin();
 }
 
 /**
@@ -292,7 +289,8 @@ void M5Telemetry::standAlonePrint(bool standAloneUpdate)
 void M5Telemetry::run(bool forceStandAlone, uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibrationMotorAddress, uint8_t speakerAddress, bool useRgb)
 {
     M5Tel.scan(buttonHubAddr, fsrAddr, vibrationMotorAddress, speakerAddress, useRgb);
-    if((false == forceStandAlone) && (true == commandHandler.isConnected()))
+    // CLI handler begin
+    if((false == forceStandAlone) && commandHandler.begin())
     {
         slaveHandler();
     }
@@ -313,14 +311,14 @@ void M5Telemetry::slaveHandler()
 
     while(1)
     {
-        commandHandler.rxSerial();
+        commandHandler.rxSlave();
         commandValue = commandHandler.bufferToUint32(RxBuffer + 4); // Assumption the 5-8 bytes holds command name
         M5.Lcd.printf("Received command Id %u\n", commandValue);
         // Run command
         if(commandValue < COMMAND_MAX_COMMANDS)
         {
             commandLookupTable[(uint8_t)commandValue]();
-            commandHandler.txSerial();
+            commandHandler.txSlave();
         }
         else
         {

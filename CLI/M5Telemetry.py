@@ -22,9 +22,9 @@ from CLI.Devices.HRU import HRU
 
 class M5Telemetry:
 
-    def __init__(self, plot_amg: bool = False):
+    def __init__(self, plot_amg: bool = False, is_wifi: bool = False):
         # Create an instance of CommandHandler to handle commands.
-        self.__command_handler = CommandHandler()
+        self.__command_handler = CommandHandler(is_wifi)
 
         # Initialize devices.
         self.fsr = Fsr()
