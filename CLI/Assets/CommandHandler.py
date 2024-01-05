@@ -6,6 +6,7 @@ import sys
 root_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../")
 sys.path.append(root_path)
 from CLI.Assets.SerialHandler import SerialHandler
+from CLI.Assets.WifiHandler import WifiHandler
 
 
 class Commands_e(enum.IntEnum):
@@ -32,9 +33,12 @@ class PbHubPortAddr_e(enum.IntEnum):
 class CommandHandler:
     invalid_pb_hub_port = 0xFF
 
-    def __init__(self):
+    def __init__(self, is_wifi: bool = False):
         # TODO: need to Create WIFI Handler
-        self.__handler = SerialHandler()
+        if is_wifi:
+            self.__handler = WifiHandler()
+        else:
+            self.__handler = SerialHandler()
 
         if self.__handler is None:
             raise ConnectionError("Couldn't connect to M5Stack")
@@ -44,7 +48,7 @@ class CommandHandler:
 
     def send_command(self, command: Commands_e, *args, **kwargs):
         """
-        Write command in serial/wifi
+        Write command in serial / wifi
         :param command: command name
         :param args:
         :param kwargs:
