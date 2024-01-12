@@ -17,7 +17,8 @@
 #include <SparkFun_VL53L5CX_Library.h> //http://librarymanager/All#SparkFun_VL53L5CX
 
 
-
+SparkFun_VL53L5CX myImager;
+VL53L5CX_ResultsData measurementData; // Result data class structure, 1356 byes of RAM
 int imageResolution = 0; //Used to pretty print output
 int imageWidth = 0; //Used to pretty print output
 uint8_t maxRes = 8*8;
