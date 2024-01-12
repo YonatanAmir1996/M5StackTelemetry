@@ -8,9 +8,9 @@
 
 
 // WIFI 
-const char* ssid = "Bar1";
-const char* password = "0526006314";
-const char* serverAddress = "192.168.7.7";    // Do not change
+const char* ssid = "Free-TAU";
+const char* password = "free-tau";
+const char* serverAddress = "172.30.6.174";    // Do not change
 const int serverPort = 12345;                 // Do not change
 WiFiClient client;
 
@@ -63,6 +63,7 @@ uint8_t CommandHandler::begin() {
         }
         if (num_of_retries < MAX_RETRIES)
         {
+          M5.Lcd.println("Try connect server!");
             num_of_retries = 0;
             while(num_of_retries < MAX_RETRIES)
             {
