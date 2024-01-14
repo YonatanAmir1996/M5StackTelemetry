@@ -7,11 +7,11 @@
 #define WORD_NUM_OF_BYTES 4 
 
 
-// WIFI 
+// WIFI Hardcoded data
 const char* ssid = "Free-TAU";
 const char* password = "free-tau";
-const char* serverAddress = "172.30.6.174";    // Do not change
-const int serverPort = 12345;                 // Do not change
+const char* serverAddress = "172.30.6.174";
+const int serverPort = 12345;
 WiFiClient client;
 
 // Buffer definitions
