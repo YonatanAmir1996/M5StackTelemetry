@@ -34,7 +34,7 @@ class CommandHandler
         CommandHandler();
         ~CommandHandler();
 
-        uint8_t  begin();
+        uint8_t  begin(WifiStruct *pWifiDetails);
         void     txSlave();
         void     rxSlave();   
         uint32_t bufferToUint32(const byte* buffer);

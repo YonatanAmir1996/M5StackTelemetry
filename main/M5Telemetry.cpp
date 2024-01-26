@@ -286,11 +286,12 @@ void M5Telemetry::standAlonePrint(bool standAloneUpdate)
  * @param vibrationMotorAddress Address for vibration motor.
  * @param useRgb Flag to determine if RGB device is used.
  */
-void M5Telemetry::run(bool forceStandAlone, uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibrationMotorAddress, uint8_t speakerAddress, bool useRgb)
+void M5Telemetry::run(bool forceStandAlone, uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibrationMotorAddress, uint8_t speakerAddress, bool useRgb,
+                      WifiStruct *pWifiDetails)
 {
     M5Tel.scan(buttonHubAddr, fsrAddr, vibrationMotorAddress, speakerAddress, useRgb);
     // CLI handler begin
-    if((false == forceStandAlone) && commandHandler.begin())
+    if((false == forceStandAlone) && commandHandler.begin(pWifiDetails))
     {
         slaveHandler();
     }

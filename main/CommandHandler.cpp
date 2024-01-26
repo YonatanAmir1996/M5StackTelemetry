@@ -6,12 +6,6 @@
 #define MAX_RETRIES 3
 #define WORD_NUM_OF_BYTES 4 
 
-
-// WIFI Hardcoded data
-const char* ssid = "Free-TAU";
-const char* password = "free-tau";
-const char* serverAddress = "172.30.6.174";
-const int serverPort = 12345;
 WiFiClient client;
 
 // Buffer definitions
@@ -37,7 +31,7 @@ CommandHandler::~CommandHandler() {}
  * 
  * @return If managed to succseed being slave
  */
-uint8_t CommandHandler::begin() {
+uint8_t CommandHandler::begin(WifiStruct *pWifiDetails) {
     uint8_t num_of_retries = 0;
 
     connectionType = RUNNING_MODE_STANDALONE;  // Fallback to standalone mode
@@ -51,7 +45,7 @@ uint8_t CommandHandler::begin() {
     }
     else
     {
-        WiFi.begin(ssid, password);
+        WiFi.begin(pWifiDetails->ssid, pWifiDetails->password);
         M5.Lcd.println("Trying connect via WIFI!");
         while (num_of_retries < MAX_RETRIES) {      
             if (WiFi.status() == WL_CONNECTED)
@@ -67,7 +61,7 @@ uint8_t CommandHandler::begin() {
             num_of_retries = 0;
             while(num_of_retries < MAX_RETRIES)
             {
-                if (client.connect(serverAddress, serverPort))
+                if (client.connect(pWifiDetails->serverAddress, pWifiDetails->serverPort))
                 {
                     connectionType = RUNNING_MODE_WIFI;
                     M5.Lcd.println("Connected via Wifi!");
