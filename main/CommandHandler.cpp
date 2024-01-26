@@ -1,12 +1,14 @@
 #include <WiFi.h>
 #include <WiFiClient.h>
+#include <WiFiMulti.h>
 #include "CommandHandler.h"
 
 
-#define MAX_RETRIES 3
+#define MAX_RETRIES 30
 #define WORD_NUM_OF_BYTES 4 
 
 WiFiClient client;
+WiFiMulti WiFiMulti;
 
 // Buffer definitions
 byte RxBuffer[MAX_BUFFER_SIZE] = {0};  /**< Receive buffer. */
@@ -44,14 +46,15 @@ uint8_t CommandHandler::begin(WifiStruct *pWifiDetails) {
         M5.Lcd.println("Connected via Serial!");
     }
     else
-    {
-        WiFi.begin(pWifiDetails->ssid, pWifiDetails->password);
+    { 
         M5.Lcd.println("Trying connect via WIFI!");
-        while (num_of_retries < MAX_RETRIES) {      
-            if (WiFi.status() == WL_CONNECTED)
-            {
-                break;
-            }
+        M5.Lcd.print(pWifiDetails->ssid);
+        M5.Lcd.println();
+        M5.Lcd.print(pWifiDetails->password);
+        M5.Lcd.println();
+        WiFiMulti.addAP(pWifiDetails->ssid, pWifiDetails->password);  // Add wifi configuration information.  添加wifi配置信息  
+        while ((WiFiMulti.run() != WL_CONNECTED) && (num_of_retries < MAX_RETRIES))
+        {     
             num_of_retries++;
             delay(1000);
         }

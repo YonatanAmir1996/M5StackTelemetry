@@ -28,13 +28,13 @@ def poll_devices(m5_telemetry_interface: M5Telemetry, to_set: bool):
     # print(m5_telemetry_interface.hru)  # Accessing the 'hru' attribute from M5Telemetry object.
     if to_set is True:
         # Setting values on various devices through the M5Telemetry object.
-        m5_telemetry_interface.command_set_speaker()
-        m5_telemetry_interface.command_set_rgb(0, 0, 80, 0)
-        # m5_telemetry_interface.command_set_motor(50)
+        # m5_telemetry_interface.command_set_speaker()
+        # m5_telemetry_interface.command_set_rgb(0, 0, 80, 0)
+        m5_telemetry_interface.command_set_motor(50)
     else:
         # Resetting RGB and motor values to default through the M5Telemetry object.
-        m5_telemetry_interface.command_set_rgb(0, 0, 0, 0)
-        # m5_telemetry_interface.command_set_motor(0)
+        # m5_telemetry_interface.command_set_rgb(0, 0, 0, 0)
+        m5_telemetry_interface.command_set_motor(0)
 
 
 if __name__ == '__main__':
@@ -42,14 +42,14 @@ if __name__ == '__main__':
     interface = M5Telemetry(is_wifi=True)
 
     # Rescanning various devices to set their addresses.
-    interface.rescan(button_pb_hub_addr=PbHubPortAddr_e.PORT_0,
+    interface.rescan(button_pb_hub_addr=PbHubPortAddr_e.PORT_4,
                      fsr_pb_hub_addr=PbHubPortAddr_e.PORT_1,
-                     vibration_motor_pb_hub_addr=PbHubPortAddr_e.INVALID,
-                     speaker_pb_hub_addr=PbHubPortAddr_e.PORT_5,
+                     vibration_motor_pb_hub_addr=PbHubPortAddr_e.PORT_2,
+                     speaker_pb_hub_addr=PbHubPortAddr_e.INVALID,
                      is_rgb_connected=False)
     set_output = True
     while True:
         # Continuously poll devices and possibly set new values based on the set_output flag.
         poll_devices(interface, set_output)
         set_output = not set_output  # Toggle the set_output flag.
-        time.sleep(0.2)  # Sleep for 2 seconds before polling the devices again.
+        time.sleep(0.4)  # Sleep for 0.2 seconds before polling the devices again.
