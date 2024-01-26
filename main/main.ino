@@ -25,6 +25,6 @@ void loop()
         PB_HUB_PORT_3_ADDR,       // Vibration Motor PbHub address
         PB_HUB_PORT_5_ADDR,       // speaker Address
         false,                    // use RGB device(Supported only in PORT B)
-        &wifiDetails,
+        &wifiDetails
         );
 }
