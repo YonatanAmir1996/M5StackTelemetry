@@ -1,16 +1,13 @@
 #include "M5Telemetry.h"
 #include "SharedDefines.h"
 
-const char *ssid = "Free-TAU";
-const char *password = "free-tau";
-const char *serverAddress = "172.30.6.174";
 
 // Wifi details are hardcoded
 WifiStruct wifiDetails = 
 {
-    .ssid = ssid,
-    .password = password,
-    .serverAddress = serverAddress,
+    .ssid = "Bar1",
+    .password = "0526006314",
+    .serverAddress = "192.168.7.7",
     .serverPort = 12345
 };
 

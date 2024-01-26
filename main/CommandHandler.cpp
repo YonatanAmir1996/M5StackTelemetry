@@ -39,14 +39,21 @@ uint8_t CommandHandler::begin(WifiStruct *pWifiDetails) {
     connectionType = RUNNING_MODE_STANDALONE;  // Fallback to standalone mode
     // Try to connect by WIFI/Serial
     M5.Lcd.println("Trying connect via Serial!");
-    if (USBSerial)
+    while (num_of_retries < 10)
     {
-        USBSerial.setTimeout(10000);
-        connectionType = RUNNING_MODE_SERIAL;
-        M5.Lcd.println("Connected via Serial!");
+        if (USBSerial)
+        {
+          USBSerial.setTimeout(10000);
+          connectionType = RUNNING_MODE_SERIAL;
+          M5.Lcd.println("Connected via Serial!");
+          break;
+        }
+        num_of_retries += 1;
     }
-    else
+    
+    if (num_of_retries == 10)
     { 
+        num_of_retries = 0;
         M5.Lcd.println("Trying connect via WIFI!");
         M5.Lcd.print(pWifiDetails->ssid);
         M5.Lcd.println();
@@ -102,22 +109,22 @@ void CommandHandler::txSlave() {
  * @brief Transmit data over serial
  */
 void CommandHandler::txSerial() {
-    uint32_t remainedBytes = 4;
-    // Clean Rx Buffer
-    rxNumOfBytes = 0;
-
-     // Transmit the number of bytes that will be sent
-    while (remainedBytes)
+    uint32_t chunkSize = 32; // Size of each chunk
+    uint32_t bytesSent = 0;  // Bytes sent in each iteration
+    byte     *pBuf = TxBuffer;
+    // Transmit the number of bytes that will be sent
+    USBSerial.write((byte*)&txNumOfBytes, sizeof(txNumOfBytes)); // Send 4 bytes representing the size
+    USBSerial.flush(); // Ensure all data is sent
+    // Transmit the actual data in chunks
+    while (txNumOfBytes > 0) 
     {
-        remainedBytes -= USBSerial.write((byte*)&txNumOfBytes, remainedBytes);
+        bytesSent = chunkSize < txNumOfBytes? chunkSize : txNumOfBytes;
+        USBSerial.write(pBuf, bytesSent);     
+        USBSerial.flush(); // Ensure all data is sent
+        txNumOfBytes -= bytesSent;
+        pBuf += bytesSent;
     }
 
-     // Transmit the actual data
-    remainedBytes = txNumOfBytes;
-    while (remainedBytes)
-    {
-        remainedBytes -= USBSerial.write(TxBuffer + (txNumOfBytes - remainedBytes), remainedBytes);
-    }
 
     // Reset the Tx buffer counter
     txNumOfBytes = 0;
@@ -135,6 +142,7 @@ void CommandHandler::txWifi() {
     while (remainedBytes)
     {
         remainedBytes -= client.write((byte*)&txNumOfBytes, remainedBytes);
+        delay(10);
     }
     
     // Transmit the actual data
@@ -142,6 +150,7 @@ void CommandHandler::txWifi() {
     while (remainedBytes)
     {
         remainedBytes -= client.write(TxBuffer + (txNumOfBytes - remainedBytes), remainedBytes);
+        delay(10);
     }
 
     // Reset the Tx buffer counter
@@ -184,6 +193,7 @@ void CommandHandler::rxSerial() {
     USBSerial.readBytes(RxBuffer, WORD_NUM_OF_BYTES);
     commandHandler.rxNumOfBytes = commandHandler.bufferToUint32(RxBuffer);
     USBSerial.readBytes((RxBuffer + WORD_NUM_OF_BYTES), commandHandler.rxNumOfBytes);
+    USBSerial.flush();
 }
 
 void CommandHandler::rxWifi() {
