@@ -7,7 +7,7 @@
 
 
 #define MAX_ARGUMENTS 10
-#define MAX_BUFFER_SIZE 1024 * 2 // 10 KB buffer
+#define MAX_BUFFER_SIZE 1024 * 4 // 10 KB buffer
 
 typedef struct
 {

@@ -71,7 +71,6 @@ class SerialHandler(AbsHandler):
             bytes_to_read = int.from_bytes(self.__serial.read(4), byteorder='little')
             bytes_received = bytes()
             while bytes_to_read:
-                print(self.__serial.in_waiting)
                 if self.__serial.in_waiting:
                     temp_packet = self.__serial.read(min(bytes_to_read, self.__serial.in_waiting))
                     bytes_received += temp_packet
