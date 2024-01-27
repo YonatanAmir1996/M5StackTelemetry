@@ -34,7 +34,7 @@ def poll_devices(m5_telemetry_interface: M5Telemetry, to_set: bool, motor_pwm: i
 
 if __name__ == '__main__':
     # Creating an instance of the M5Telemetry class.
-    interface = M5Telemetry(is_wifi=False)
+    interface = M5Telemetry(is_wifi=True)
 
     # Rescanning various devices to set their addresses.
     interface.rescan(button_pb_hub_addr=PbHubPortAddr_e.INVALID,
@@ -48,6 +48,7 @@ if __name__ == '__main__':
     while True:
         # Continuously poll devices and possibly set new values based on the set_output flag.
         set_output = False
+        # Vibration Motor -> 3 seconds off | 1 second on
         if state == 0:
             if (time.time() - start_time) > 3:
                 set_output = True  # Toggle the set_output flag.

@@ -94,6 +94,8 @@ uint8_t CommandHandler::begin(WifiStruct *pWifiDetails) {
  * @brief Transmit data.
  */
 void CommandHandler::txSlave() {
+    // Clean Rx Buffer
+    rxNumOfBytes = 0;
     if (connectionType == RUNNING_MODE_SERIAL)
     {
         txSerial();
@@ -102,7 +104,6 @@ void CommandHandler::txSlave() {
     {
         txWifi();
     }
-
 }
 
 /**
@@ -111,7 +112,7 @@ void CommandHandler::txSlave() {
 void CommandHandler::txSerial() {
     uint32_t chunkSize = 32; // Size of each chunk
     uint32_t bytesSent = 0;  // Bytes sent in each iteration
-    byte     *pBuf = TxBuffer;
+    byte     *pBuf     = TxBuffer;
     // Transmit the number of bytes that will be sent
     USBSerial.write((byte*)&txNumOfBytes, sizeof(txNumOfBytes)); // Send 4 bytes representing the size
     USBSerial.flush(); // Ensure all data is sent
@@ -124,37 +125,28 @@ void CommandHandler::txSerial() {
         txNumOfBytes -= bytesSent;
         pBuf += bytesSent;
     }
-
-
-    // Reset the Tx buffer counter
-    txNumOfBytes = 0;
 }
 
 /**
  * @brief Transmit data over wifi
  */
 void CommandHandler::txWifi() {
-    uint32_t remainedBytes = 4;
-    // Clean Rx Buffer
-    rxNumOfBytes = 0;
+    uint32_t chunkSize = 32; // Size of each chunk
+    uint32_t bytesSent = 0;  // Bytes sent in each iteration
+    byte     *pBuf     = TxBuffer;
 
-     // Transmit the number of bytes that will be sent
-    while (remainedBytes)
+    // Transmit the number of bytes that will be sent
+    client.write((byte*)&txNumOfBytes, sizeof(txNumOfBytes)); // Send 4 bytes representing the size
+    client.flush();  // Ensure all data is sent
+    // Transmit the actual data in chunks
+    while (txNumOfBytes > 0) 
     {
-        remainedBytes -= client.write((byte*)&txNumOfBytes, remainedBytes);
-        delay(10);
+        bytesSent = chunkSize < txNumOfBytes? chunkSize : txNumOfBytes;
+        client.write(pBuf, bytesSent);     
+        client.flush(); // Ensure all data is sent
+        txNumOfBytes -= bytesSent;
+        pBuf += bytesSent;
     }
-    
-    // Transmit the actual data
-    remainedBytes = txNumOfBytes;
-    while (remainedBytes)
-    {
-        remainedBytes -= client.write(TxBuffer + (txNumOfBytes - remainedBytes), remainedBytes);
-        delay(10);
-    }
-
-    // Reset the Tx buffer counter
-    txNumOfBytes = 0;
 }
 
 /**

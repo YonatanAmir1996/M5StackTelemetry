@@ -162,8 +162,8 @@ void M5Telemetry::scan(uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibration
     // internal devices (interrupt / lcd handling etc...)
     if(buttonHubAddr == PB_HUB_PORT_INVALID_ADDR)   
     {
-        M5.Lcd.printf("Button must be set!\n Reset Device.");
-        while(1) {};
+        //M5.Lcd.printf("Button must be set!\n Reset Device.");
+       // while(1) {};
     }
     M5.Lcd.println("Button initialized");
     button.begin(buttonHubAddr); 
