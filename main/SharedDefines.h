@@ -99,4 +99,14 @@ typedef enum
     COMMAND_INVALID = 0xFF
 } Commands_e;
 
+typedef struct
+{
+  const char *ssid; 
+  const char *password;
+  const char *serverAddress;
+  uint16_t    serverPort;
+} WifiStruct;
+
+
+
 #endif

@@ -2,6 +2,7 @@ import serial.tools.list_ports
 import serial
 import os
 import sys
+import time
 
 root_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../")
 sys.path.append(root_path)
@@ -30,10 +31,10 @@ class SerialHandler(AbsHandler):
                 self.__comport = port.name
 
         # Configure the serial connection using the identified port and specified baud rate.
-        self.__serial = serial.Serial(timeout=None)
+        self.__serial = serial.Serial()
         self.__serial.baudrate = baudrate
         self.__serial.port = self.__comport
-
+        self.__timeout = 30
         # Try to establish the serial connection.
         self.connect()
 
@@ -63,22 +64,17 @@ class SerialHandler(AbsHandler):
             while num_of_bytes_write:
                 num_of_bytes_write -= self.__serial.write(data)
 
-            # Clear the output buffer.
-            self.__serial.flush()
-
             # Wait for at least 4 bytes to be available in the input buffer.
             while self.__serial.in_waiting < 4:
-                pass
-
+                time.sleep(0.01)
             # Read 4 bytes to determine the number of bytes to read next.
             bytes_to_read = int.from_bytes(self.__serial.read(4), byteorder='little')
-
-            # If there are bytes to read, fetch them; otherwise, return an empty bytes object.
-            if bytes_to_read:
-                self.__serial.flush()
-                while self.__serial.in_waiting != bytes_to_read:
-                    pass
-                bytes_received = self.__serial.read(self.__serial.in_waiting)
-            else:
-                bytes_received = bytes()
+            bytes_received = bytes()
+            while bytes_to_read:
+                if self.__serial.in_waiting:
+                    temp_packet = self.__serial.read(min(bytes_to_read, self.__serial.in_waiting))
+                    bytes_received += temp_packet
+                    bytes_to_read -= len(temp_packet)
+                else:
+                    time.sleep(0.01)  # Wait a bit for more data to arrive
             return bytes_received

@@ -31,6 +31,7 @@ class WifiHandler(AbsHandler):
                 self.client_socket, self.addr = self.server_socket.accept()
             except:
                 pass
+        print("Slave connected")
 
     def disconnect(self):
         if self.client_socket:

@@ -129,8 +129,6 @@ void M5Telemetry::scan(uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibration
             if(pPaHubDeviceHandler->begin())
             {
                 M5.Lcd.printf("DeviceId %u initialized\n", device);
-                // USBSerial.printf("DeviceId %u identified\n", device);
-                pPaHubDeviceHandler->shutdown();
             }
             else
             {
@@ -160,13 +158,11 @@ void M5Telemetry::scan(uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibration
     }
 
     // internal devices (interrupt / lcd handling etc...)
-    if(buttonHubAddr == PB_HUB_PORT_INVALID_ADDR)   
+    if(buttonHubAddr != PB_HUB_PORT_INVALID_ADDR)   
     {
-        M5.Lcd.printf("Button must be set!\n Reset Device.");
-        while(1) {};
+        M5.Lcd.println("Button initialized");
+        button.begin(buttonHubAddr); 
     }
-    M5.Lcd.println("Button initialized");
-    button.begin(buttonHubAddr); 
 
     // Port B outputs
     if (useRgb)
@@ -188,8 +184,6 @@ void M5Telemetry::scan(uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibration
         M5.Lcd.println("Speaker initialized");
         speaker.begin(speakerAddress);
     }
-
-    delay(3000);
 }
 
 
@@ -215,10 +209,11 @@ void M5Telemetry::update()
  * 
  * @param standAloneUpdate Flag for standalone update mode.
  */
-void M5Telemetry::standAlonePrint(bool standAloneUpdate)
+void M5Telemetry::standAlonePrint(bool standAloneUpdate, uint32_t standAloneUpdateRateInMs)
 {
     /* Print to screen and update values for each module*/
-    uint8_t state = (DeviceName_e)DEVICE_IMU;
+    uint8_t  state        = (DeviceName_e)DEVICE_START_ALL_DEVICES;
+    uint32_t tsLastReport = millis();
 
     //Find first activated sensor
     while(!pDeviceHandlers[state])
@@ -228,52 +223,47 @@ void M5Telemetry::standAlonePrint(bool standAloneUpdate)
 
     while(1)
     {
-        if(button.IfButtonPressed())
+        if (!standAloneUpdate && button.IfButtonPressed())
         {
-            
-            if(standAloneUpdate)
-            {
-                /* Shutdown the device which was used */
-                pDeviceHandlers[state]->shutdown();
-            }
-
             state += 1;
             while(!pDeviceHandlers[state])
             {
                 state += 1;
                 if(state == DEVICE_MAX_DEVICES)
                 {
-                    state = DEVICE_IMU;
+                    state = DEVICE_START_ALL_DEVICES;
                 }
             }
 
             if(state == DEVICE_MAX_DEVICES)
             {
-                state = DEVICE_IMU;
-            }
-
-            if(standAloneUpdate)
-            {
-                /* Wakeup new device */
-                pDeviceHandlers[state]->restart();
+                state = DEVICE_START_ALL_DEVICES;
             }
         }
 
-        if(standAloneUpdate)
+        if (standAloneUpdate)
         {
-            if(pDeviceHandlers[state])
+            if ((millis() - tsLastReport) > standAloneUpdateRateInMs)
             {
-                pDeviceHandlers[state]->update();
-                pDeviceHandlers[state]->print();
+                tsLastReport = millis();
+                state++;
+                while (!pDeviceHandlers[state])
+                {
+                    state++;
+                    if(state == DEVICE_MAX_DEVICES)
+                    {
+                        state = DEVICE_START_ALL_DEVICES;
+                    }
+                }
+                if(state == DEVICE_MAX_DEVICES)
+                {
+                    state = DEVICE_START_ALL_DEVICES;
+                }
             }
         }
-        else
-        {
-            update();
-            pDeviceHandlers[state]->print();
-        }
-
-        delay(100);
+        update();
+        pDeviceHandlers[state]->print();
+        delay(20);
     }
 }
 
@@ -286,17 +276,19 @@ void M5Telemetry::standAlonePrint(bool standAloneUpdate)
  * @param vibrationMotorAddress Address for vibration motor.
  * @param useRgb Flag to determine if RGB device is used.
  */
-void M5Telemetry::run(bool forceStandAlone, uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibrationMotorAddress, uint8_t speakerAddress, bool useRgb)
+void M5Telemetry::run(bool forceStandAlone, uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibrationMotorAddress, uint8_t speakerAddress, bool useRgb,
+                      WifiStruct *pWifiDetails, bool forceStandAloneUpdate, uint32_t standAloneUpdateRateInMs)
 {
     M5Tel.scan(buttonHubAddr, fsrAddr, vibrationMotorAddress, speakerAddress, useRgb);
     // CLI handler begin
-    if((false == forceStandAlone) && commandHandler.begin())
+    if((false == forceStandAlone) && commandHandler.begin(pWifiDetails))
     {
         slaveHandler();
     }
     else
     {
-        M5Tel.standAlonePrint(false); 
+        M5.Lcd.println("In!");
+        M5Tel.standAlonePrint(forceStandAloneUpdate, standAloneUpdateRateInMs); 
     }
 }
 

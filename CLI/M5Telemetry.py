@@ -53,7 +53,6 @@ class M5Telemetry:
 
         # Get the total size of the data stream.
         size = len(data_stream)
-
         # Iterate over the data stream and update device values.
         while size:
             # Extract the size of the current device data from the stream.

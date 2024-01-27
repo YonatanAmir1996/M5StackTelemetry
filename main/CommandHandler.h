@@ -7,7 +7,7 @@
 
 
 #define MAX_ARGUMENTS 10
-#define MAX_BUFFER_SIZE 1024 * 2 // 10 KB buffer
+#define MAX_BUFFER_SIZE 1024 * 4 // 10 KB buffer
 
 typedef struct
 {
@@ -34,7 +34,7 @@ class CommandHandler
         CommandHandler();
         ~CommandHandler();
 
-        uint8_t  begin();
+        uint8_t  begin(WifiStruct *pWifiDetails);
         void     txSlave();
         void     rxSlave();   
         uint32_t bufferToUint32(const byte* buffer);
