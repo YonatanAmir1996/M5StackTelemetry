@@ -4,7 +4,7 @@
 
 #include "SharedDefines.h"
 #include "CommandHandler.h"
-#define NUMBER_OF_BEGIN_TRIES 3
+#define NUMBER_OF_BEGIN_TRIES 8
 
 
 /**

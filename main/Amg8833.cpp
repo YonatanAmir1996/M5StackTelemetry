@@ -77,7 +77,6 @@ void Amg8833::print()
                        pixels[i],     pixels[i + 1], pixels[i + 2], pixels[i + 3],
                        pixels[i + 4], pixels[i + 5], pixels[i + 6], pixels[i + 7]);
     }
-    delay(100);
 }
 
 uint32_t Amg8833::writeIntoTxBuffer(uint32_t offset)

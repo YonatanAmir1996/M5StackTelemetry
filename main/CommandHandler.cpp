@@ -4,7 +4,7 @@
 #include "CommandHandler.h"
 
 
-#define MAX_RETRIES 30
+#define MAX_RETRIES 10
 #define WORD_NUM_OF_BYTES 4 
 
 WiFiClient client;
@@ -38,7 +38,7 @@ uint8_t CommandHandler::begin(WifiStruct *pWifiDetails) {
 
     connectionType = RUNNING_MODE_STANDALONE;  // Fallback to standalone mode
     // Try to connect by WIFI/Serial
-    M5.Lcd.println("Trying connect via Serial!");
+    M5.Lcd.println("Trying connecting via Serial!");
     while (num_of_retries < 10)
     {
         if (USBSerial)
@@ -49,25 +49,32 @@ uint8_t CommandHandler::begin(WifiStruct *pWifiDetails) {
           break;
         }
         num_of_retries += 1;
+        delay(400);
     }
     
     if (num_of_retries == 10)
     { 
         num_of_retries = 0;
-        M5.Lcd.println("Trying connect via WIFI!");
+        M5.Lcd.println("Trying connecting via WIFI!");
+        M5.Lcd.print("SSID: ");
         M5.Lcd.print(pWifiDetails->ssid);
         M5.Lcd.println();
+        M5.Lcd.print("Password: ");
         M5.Lcd.print(pWifiDetails->password);
         M5.Lcd.println();
         WiFiMulti.addAP(pWifiDetails->ssid, pWifiDetails->password);  // Add wifi configuration information.  添加wifi配置信息  
         while ((WiFiMulti.run() != WL_CONNECTED) && (num_of_retries < MAX_RETRIES))
         {     
             num_of_retries++;
-            delay(1000);
+            delay(400);
         }
         if (num_of_retries < MAX_RETRIES)
         {
-          M5.Lcd.println("Try connect server!");
+            M5.Lcd.println("Try connecting server");
+            M5.Lcd.print(pWifiDetails->serverAddress);
+            M5.Lcd.print(":");
+            M5.Lcd.print(pWifiDetails->serverPort);
+            M5.Lcd.println();
             num_of_retries = 0;
             while(num_of_retries < MAX_RETRIES)
             {
@@ -79,11 +86,11 @@ uint8_t CommandHandler::begin(WifiStruct *pWifiDetails) {
                     break;
                 }
                 num_of_retries++;
-                delay(1000);
+                delay(400);
             }
         }
     }
-    M5.Lcd.print("Connection Type:");
+    M5.Lcd.print("Connection Type[0 - Serial | 1 - WIFI | 2 - Standalone]:");
     M5.Lcd.print(connectionType);
     M5.Lcd.println("");
     delay(5000);
@@ -150,7 +157,7 @@ void CommandHandler::txWifi() {
 }
 
 /**
- * @brief Receive data from Serial.
+ * @brief Receive data from master connection
  */
 void CommandHandler::rxSlave() 
 {
@@ -159,9 +166,14 @@ void CommandHandler::rxSlave()
     M5.Lcd.setTextFont(2);
     
     M5.Lcd.println("Pending for master command");
-    M5.Lcd.print("Wifi mode? ");
-    M5.Lcd.print(connectionType == RUNNING_MODE_WIFI);
-    M5.Lcd.println("");
+    if (connectionType == RUNNING_MODE_WIFI)
+    {
+      M5.Lcd.println("Via WIFI");
+    }
+    else
+    {
+      M5.Lcd.println("Via Serial");
+    }
 
     /* Main handler */
     if (connectionType == RUNNING_MODE_SERIAL)
@@ -174,28 +186,36 @@ void CommandHandler::rxSlave()
     }
 }
 
+/**
+ * @brief Receive data via serial
+ */
 void CommandHandler::rxSerial() {
-     // Wait until data is available
+    // Wait until data is available
     while(!USBSerial.available())
     {
         delay(10);
     } 
 
-     // Read the incoming data
+    // Read the incoming data
     USBSerial.readBytes(RxBuffer, WORD_NUM_OF_BYTES);
     commandHandler.rxNumOfBytes = commandHandler.bufferToUint32(RxBuffer);
     USBSerial.readBytes((RxBuffer + WORD_NUM_OF_BYTES), commandHandler.rxNumOfBytes);
     USBSerial.flush();
 }
 
+/**
+ * @brief Receive data via wifi
+ */
 void CommandHandler::rxWifi() {
+    // Wait until data is available
     while(!client.available())
     {
         delay(10);
     }
-     client.readBytes(RxBuffer, WORD_NUM_OF_BYTES);
-     commandHandler.rxNumOfBytes = commandHandler.bufferToUint32(RxBuffer);
-     client.readBytes((RxBuffer + WORD_NUM_OF_BYTES), commandHandler.rxNumOfBytes);
+    // Read the incoming data
+    client.readBytes(RxBuffer, WORD_NUM_OF_BYTES);
+    commandHandler.rxNumOfBytes = commandHandler.bufferToUint32(RxBuffer);
+    client.readBytes((RxBuffer + WORD_NUM_OF_BYTES), commandHandler.rxNumOfBytes);
 }
 
 /**

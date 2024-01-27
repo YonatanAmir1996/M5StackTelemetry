@@ -18,11 +18,12 @@ class M5Telemetry
         M5Telemetry();
         ~M5Telemetry(); 
         void begin(); 
-        void standAlonePrint(bool standAloneUpdate);
+        void standAlonePrint(bool standAloneUpdate, uint32_t standAloneUpdateRateInMs);
         void scan(uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibrationMotorAddress, uint8_t speakerAddress, bool useRgb);
         void update();
         void scanPaHub();
-        void run(bool forceStandAlone, uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibrationMotorAddress, uint8_t speakerAddress, bool useRgb, WifiStruct *pWifiDetails);   
+        void run(bool forceStandAlone, uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibrationMotorAddress, uint8_t speakerAddress, bool useRgb, WifiStruct *pWifiDetails, bool forceStandAloneUpdate,
+                 uint32_t standAloneUpdateRateInMs);   
 
     private:
         void slaveHandler();

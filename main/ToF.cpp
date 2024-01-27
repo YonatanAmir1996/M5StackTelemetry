@@ -47,7 +47,7 @@ bool ToF::begin()
         else
         {
             count++;
-            delay(100);
+            delay(200);
         }
     }
     return (count < NUMBER_OF_BEGIN_TRIES);
@@ -58,19 +58,7 @@ bool ToF::begin()
  */
 void ToF::update()
 {
-    uint8_t tsLastReport = millis();
-
     switchPort();
-    // while((millis() - tsLastReport) < TOF_MAX_REPORT_TIME) 
-    // {
-    //     if(myImager.isDataReady())
-    //     {
-    //         if(myImager.getRangingData(&measurementData))
-    //         {
-    //             break;
-    //         }
-    //     }
-    // }  
     if(myImager.isDataReady())
     {
         myImager.getRangingData(&measurementData);
