@@ -21,17 +21,13 @@ RGB::RGB() : isConnected(false)
  */
 bool RGB::begin()
 {
-    if(isConnected)
-    {
-        pixels.clear();
-    }
-    else
+    if(!isConnected)
     {
         M5.Axp.powerModeSet(POWER_MODE_USB_IN_BUS_OUT);
         pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+        pixels.begin();
+        isConnected = true;
     }
-    pixels.begin();
-    isConnected = true;
     return true;
 }
 
@@ -55,6 +51,5 @@ void RGB::SetRGB(uint8_t id, uint8_t red, uint8_t green, uint8_t blue)
     {
         pixels.setPixelColor(id, pixels.Color(red, green, blue));
         pixels.show();
-        delay(200);
     }
 }
