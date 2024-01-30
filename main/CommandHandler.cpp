@@ -165,14 +165,14 @@ void CommandHandler::rxSlave()
     M5.Lcd.setCursor(0,0);
     M5.Lcd.setTextFont(2);
     
-    M5.Lcd.println("Pending for master command");
+    //M5.Lcd.println("Pending for master command");
     if (connectionType == RUNNING_MODE_WIFI)
     {
       M5.Lcd.println("Via WIFI");
     }
     else
     {
-      M5.Lcd.println("Via Serial");
+      //M5.Lcd.println("Via Serial");
     }
 
     /* Main handler */

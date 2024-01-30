@@ -305,7 +305,7 @@ void M5Telemetry::slaveHandler()
     {
         commandHandler.rxSlave();
         commandValue = commandHandler.bufferToUint32(RxBuffer + 4); // Assumption the 5-8 bytes holds command name
-        M5.Lcd.printf("Received command Id %u\n", commandValue);
+        //M5.Lcd.printf("Received command Id %u\n", commandValue);
         // Run command
         if(commandValue < COMMAND_MAX_COMMANDS)
         {
@@ -332,7 +332,7 @@ void M5Telemetry::runCommand()
 {
     uint32_t bitmap = commandHandler.bufferToUint32(RxBuffer + 8);
 
-    M5.Lcd.printf("Received bitmap of devices 0x%X\n", bitmap);
+    //M5.Lcd.printf("Received bitmap of devices 0x%X\n", bitmap);
 
     commandHandler.txNumOfBytes = 0;
     for(uint8_t deviceId = 0; deviceId < (uint8_t)DEVICE_MAX_DEVICES; deviceId++)

@@ -165,7 +165,7 @@ class M5Telemetry:
         plt.ion()  # Enable interactive mode
 
         # Create dummy data for initializing the visualization
-        dummy_data = np.zeros((256, 256))
+        dummy_data = np.zeros((64, 64))
         img = ax.imshow(dummy_data, cmap='hot', interpolation='none', vmin=min_distance_in_mm, vmax=max_distance_in_mm)  # using 'hot' colormap here
         cbar = plt.colorbar(img, ax=ax)
         cbar.set_label('Distance (mm)')

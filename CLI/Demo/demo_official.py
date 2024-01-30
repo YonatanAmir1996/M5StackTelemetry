@@ -11,7 +11,7 @@ from CLI.Devices.DeviceAbs import Device_e
 from CLI.Assets.CommandHandler import PbHubPortAddr_e
 
 
-def poll_devices(m5_telemetry_interface: M5Telemetry, to_set: bool, motor_pwm: int):
+def poll_devices(m5_telemetry_interface: M5Telemetry, to_set: bool, motor_pwm: int, rgb: int):
     """
     This function polls various devices to retrieve and possibly set new data.
     :param m5_telemetry_interface: The M5Telemetry object used for getting and setting data.
@@ -28,22 +28,23 @@ def poll_devices(m5_telemetry_interface: M5Telemetry, to_set: bool, motor_pwm: i
     if to_set:
         # Setting values on various devices through the M5Telemetry object.
         # m5_telemetry_interface.command_set_speaker()
-        # m5_telemetry_interface.command_set_rgb(0, 0, 80, 0)
-        m5_telemetry_interface.command_set_motor(motor_pwm)
+        m5_telemetry_interface.command_set_rgb(0, rgb, 0, 0)
+        # m5_telemetry_interface.command_set_motor(motor_pwm)
 
 
 if __name__ == '__main__':
     # Creating an instance of the M5Telemetry class.
-    interface = M5Telemetry(is_wifi=True)
+    interface = M5Telemetry(is_wifi=False)
 
     # Rescanning various devices to set their addresses.
     interface.rescan(button_pb_hub_addr=PbHubPortAddr_e.INVALID,
-                     fsr_pb_hub_addr=PbHubPortAddr_e.PORT_1,
-                     vibration_motor_pb_hub_addr=PbHubPortAddr_e.PORT_2,
+                     fsr_pb_hub_addr=PbHubPortAddr_e.INVALID,
+                     vibration_motor_pb_hub_addr=PbHubPortAddr_e.INVALID,
                      speaker_pb_hub_addr=PbHubPortAddr_e.INVALID,
                      is_rgb_connected=False)
     start_time = time.time()
     motor_pwm = 0
+    rgb = 0
     state = 0
     while True:
         # Continuously poll devices and possibly set new values based on the set_output flag.
@@ -53,12 +54,14 @@ if __name__ == '__main__':
             if (time.time() - start_time) > 3:
                 set_output = True  # Toggle the set_output flag.
                 motor_pwm = 50
+                rgb = 80
                 state = 1
                 start_time = time.time()
         else:
             if (time.time() - start_time) > 1:
                 set_output = True
                 motor_pwm = 0
+                rgb = 0
                 state = 0
                 start_time = time.time()
-        poll_devices(interface, set_output, motor_pwm)
+        poll_devices(interface, set_output, motor_pwm, rgb)
