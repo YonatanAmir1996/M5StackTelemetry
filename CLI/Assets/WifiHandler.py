@@ -13,7 +13,7 @@ from CLI.Assets.AbsHandler import AbsHandler
 class WifiHandler(AbsHandler):
 
     host = "0.0.0.0"
-    port = 12345
+    port = 9000
 
     def __init__(self):
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

@@ -5,10 +5,10 @@
 // Wifi details are hardcoded
 WifiStruct wifiDetails = 
 {
-    .ssid = "Bar1",
-    .password = "0526006314",
-    .serverAddress = "192.168.7.7",
-    .serverPort = 12345
+    .ssid = "Yonatan",
+    .password = "a1234567",
+    .serverAddress = "192.168.119.137",
+    .serverPort = 9000
 };
 
 void setup()

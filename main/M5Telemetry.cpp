@@ -305,7 +305,7 @@ void M5Telemetry::slaveHandler()
     {
         commandHandler.rxSlave();
         commandValue = commandHandler.bufferToUint32(RxBuffer + 4); // Assumption the 5-8 bytes holds command name
-        //M5.Lcd.printf("Received command Id %u\n", commandValue);
+        M5.Lcd.printf("Received command Id %u\n", commandValue);
         // Run command
         if(commandValue < COMMAND_MAX_COMMANDS)
         {
@@ -314,9 +314,9 @@ void M5Telemetry::slaveHandler()
         }
         else
         {
-                M5.Lcd.fillScreen(BLACK);
-                M5.Lcd.setCursor(0,0);
-                M5.Lcd.setTextFont(2);
+               // M5.Lcd.fillScreen(BLACK);
+                //M5.Lcd.setCursor(0,0);
+                //M5.Lcd.setTextFont(2);
                 M5.Lcd.println("ASSERT ! Unknown command reset device");
                 while(1) {}
                 break;
