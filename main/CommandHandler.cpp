@@ -1,6 +1,5 @@
 #include <WiFi.h>
 #include <WiFiClient.h>
-#include <WiFiMulti.h>
 #include "CommandHandler.h"
 
 
@@ -8,7 +7,6 @@
 #define WORD_NUM_OF_BYTES 4 
 
 WiFiClient client;
-WiFiMulti WiFiMulti;
 
 // Buffer definitions
 byte RxBuffer[MAX_BUFFER_SIZE] = {0};  /**< Receive buffer. */
@@ -62,8 +60,9 @@ uint8_t CommandHandler::begin(WifiStruct *pWifiDetails) {
         M5.Lcd.print("Password: ");
         M5.Lcd.print(pWifiDetails->password);
         M5.Lcd.println();
-        WiFiMulti.addAP(pWifiDetails->ssid, pWifiDetails->password);  // Add wifi configuration information.  添加wifi配置信息  
-        while ((WiFiMulti.run() != WL_CONNECTED) && (num_of_retries < MAX_RETRIES))
+        WiFi.mode(WIFI_STA);
+        WiFi.begin(pWifiDetails->ssid, pWifiDetails->password);  // Add wifi configuration information.  添加wifi配置信息  
+        while ((WiFi.status() != WL_CONNECTED) && (num_of_retries < MAX_RETRIES))
         {     
             num_of_retries++;
             delay(400);
@@ -195,12 +194,15 @@ void CommandHandler::rxSerial() {
     {
         delay(10);
     } 
-
     // Read the incoming data
     USBSerial.readBytes(RxBuffer, WORD_NUM_OF_BYTES);
     commandHandler.rxNumOfBytes = commandHandler.bufferToUint32(RxBuffer);
     USBSerial.readBytes((RxBuffer + WORD_NUM_OF_BYTES), commandHandler.rxNumOfBytes);
-    USBSerial.flush();
+    //USBSerial.flush();
+    M5.Lcd.printf("RawData:%08X\n", *((uint32_t*)(&RxBuffer[0])));
+    M5.Lcd.printf("RawData:%08X\n", *((uint32_t*)(&RxBuffer[4])));
+    M5.Lcd.printf("RawData:%08X\n", *((uint32_t*)(&RxBuffer[8])));
+    M5.Lcd.printf("RawData:%08X\n", *((uint32_t*)(&RxBuffer[12])));
 }
 
 /**
