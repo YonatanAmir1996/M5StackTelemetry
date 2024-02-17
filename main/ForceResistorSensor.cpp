@@ -20,8 +20,9 @@ outputWasSet(false)
  * @param addr Address to initialize the sensor with.
  * @return Always returns true. Might need additional implementation details for error checking.
  */
-bool ForceResistorSensor::begin(uint8_t addr)
+bool ForceResistorSensor::begin(uint8_t addr, DeviceName_e deviceName)
 {
+    name = deviceName;
     hubAddr = addr;
     return true;
 }
@@ -66,7 +67,7 @@ void ForceResistorSensor::print()
 
 uint32_t ForceResistorSensor::writeIntoTxBuffer(uint32_t offset)
 {
-    uint32_t deviceName             = DEVICE_FSR402;
+    uint32_t deviceName             = (uint32_t)name;
     uint32_t deviceNumOfBytesToRead = sizeof(deviceName) + sizeof(fsrValue);
 
     update();
