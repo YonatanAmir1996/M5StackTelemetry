@@ -58,6 +58,7 @@ typedef enum
 
     DEVICE_START_EXTERNAL_PB_HUB = DEVICE_END_EXTERNAL_PA_HUB,  // Starting point for devices on PB HUB
     DEVICE_FSR402 = DEVICE_START_EXTERNAL_PB_HUB,  // External Force Sensitive Resistor sensor
+    DEVICE_FSR402_1,
     DEVICE_END_EXTERNAL_PB_HUB,          // Endpoint for external devices on PB HUB
 
     DEVICE_START_EXTERNAL_PORT_B = DEVICE_END_EXTERNAL_PB_HUB,  // Starting point for devices on Port B

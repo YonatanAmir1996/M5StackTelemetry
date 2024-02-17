@@ -1,3 +1,4 @@
+#line 1 "D:\\M5StackTelemetry\\main\\M5Telemetry.h"
 #ifndef M5_TELEMETRY_H
 #define M5_TELEMETRY_H
 
@@ -19,11 +20,11 @@ class M5Telemetry
         ~M5Telemetry(); 
         void begin(); 
         void standAlonePrint(bool standAloneUpdate, uint32_t standAloneUpdateRateInMs);
-        void scan(uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibrationMotorAddress, uint8_t speakerAddress, bool useRgb);
+        void scan(uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t fsr1addr, uint8_t vibrationMotorAddress, uint8_t speakerAddress, bool useRgb);
         void update();
         void scanPaHub();
-        void run(bool forceStandAlone, uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibrationMotorAddress, uint8_t speakerAddress, bool useRgb, WifiStruct *pWifiDetails, bool forceStandAloneUpdate,
-                 uint32_t standAloneUpdateRateInMs);   
+        void run(bool forceStandAlone, uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t fsr1addr, uint8_t vibrationMotorAddress, uint8_t speakerAddress, bool useRgb, WifiStruct *pWifiDetails, bool forceStandAloneUpdate,
+                 uint32_t standAloneUpdateRateInMs);
 
     private:
         void slaveHandler();
@@ -46,6 +47,7 @@ class M5Telemetry
         PaHubPort_e         i2cAddrToPortMap[MAX_I2C_ADDR]; // Mapping between I2C address to the port it is connected
         Button              button;
         ForceResistorSensor fsr;
+        ForceResistorSensor fsr1;
         Speaker             speaker;
         uint32_t            supportedBitmap;
         std::function<void()> commandLookupTable[COMMAND_MAX_COMMANDS];

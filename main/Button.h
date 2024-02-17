@@ -17,6 +17,7 @@ class Button : public DeviceAbs
         bool begin(uint8_t hubAddr) override;
 
     private:
+        uint8_t consecutiveClicks;
         uint8_t hubAddr;
 };
 

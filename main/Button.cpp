@@ -20,6 +20,7 @@ hubAddr(0)
 bool Button::begin(uint8_t addr)
 {
     hubAddr = addr;
+    consecutiveClicks = 0;
     return true;
 }
 
@@ -31,12 +32,14 @@ bool Button::begin(uint8_t addr)
  */
 bool Button::IfButtonPressed()
 {
-    bool     retVal = false;
-    uint16_t count = 0;
-
-    while(PbHub.readAnalogVal(hubAddr) != 0)
+    if ((PbHub.readAnalogVal(hubAddr) == 0xFFF) && (consecutiveClicks <= 5))
     {
-        count++;
+        consecutiveClicks++;
     }
-    return count > 0;
+    else
+    {
+      consecutiveClicks = 0;
+    }
+
+    return (consecutiveClicks == 5);
 }
