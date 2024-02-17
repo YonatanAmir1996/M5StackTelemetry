@@ -34,10 +34,9 @@ class SerialHandler(AbsHandler):
                     self.__comport = port.name
 
         # Configure the serial connection using the identified port and specified baud rate.
-        self.__serial = serial.Serial()
+        self.__serial = serial.Serial(timeout=3)
         self.__serial.baudrate = baudrate
         self.__serial.port = self.__comport
-        self.__timeout = 30
         # Try to establish the serial connection.
         self.connect()
 
