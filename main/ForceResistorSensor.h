@@ -15,14 +15,15 @@ class ForceResistorSensor : public DeviceAbs
     public:
         ForceResistorSensor();
         void update() override;
-        bool begin(uint8_t addr) override;
+        bool begin(uint8_t addr, DeviceName_e deviceName);
         void print() override;
         uint32_t writeIntoTxBuffer(uint32_t offset) override;
 
     private:
-        uint8_t  hubAddr;
-        uint16_t fsrValue;
-        bool     outputWasSet;
+        DeviceName_e name;
+        uint8_t      hubAddr;
+        uint16_t     fsrValue;
+        bool         outputWasSet;
 };
 
 #endif

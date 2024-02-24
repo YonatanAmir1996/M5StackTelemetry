@@ -7,6 +7,7 @@ class Device_e(enum.IntEnum):
     AMG833 = 2
     TOF = 3
     FSR = 4
+    FSR1 = 5
 
 
 class DeviceAbs:

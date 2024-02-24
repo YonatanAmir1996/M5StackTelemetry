@@ -27,7 +27,8 @@ class M5Telemetry:
         self.__command_handler = CommandHandler(is_wifi)
 
         # Initialize devices.
-        self.fsr = Fsr()
+        self.fsr = Fsr(Device_e.FSR)
+        self.fsr1 = Fsr(Device_e.FSR1)
         self.imu = Imu()
         self.tof = ToF()
         self.amg = Amg8833()
@@ -35,6 +36,7 @@ class M5Telemetry:
         # Mapping of Device enums to device instances for easy updating of device values.
         self.devices = {
             Device_e.FSR: self.fsr,
+            Device_e.FSR1: self.fsr1,
             Device_e.IMU: self.imu,
             Device_e.TOF: self.tof,
             Device_e.AMG833: self.amg,
@@ -76,15 +78,17 @@ class M5Telemetry:
         # Intended sleep to prevent buffer overloading
         time.sleep(0.01)
 
-    def rescan(self, button_pb_hub_addr: PbHubPortAddr_e,
-               fsr_pb_hub_addr: PbHubPortAddr_e = PbHubPortAddr_e.PORT_1,
-               vibration_motor_pb_hub_addr: PbHubPortAddr_e = PbHubPortAddr_e.PORT_2,
-               speaker_pb_hub_addr: PbHubPortAddr_e = PbHubPortAddr_e.PORT_5,
+    def rescan(self, button_pb_hub_addr: PbHubPortAddr_e = PbHubPortAddr_e.INVALID,
+               fsr_pb_hub_addr: PbHubPortAddr_e = PbHubPortAddr_e.INVALID,
+               fsr1_pb_hub_addr: PbHubPortAddr_e = PbHubPortAddr_e.INVALID,
+               vibration_motor_pb_hub_addr: PbHubPortAddr_e = PbHubPortAddr_e.INVALID,
+               speaker_pb_hub_addr: PbHubPortAddr_e = PbHubPortAddr_e.INVALID,
                is_rgb_connected: bool = True):
         """
         Rescan devices
         :param button_pb_hub_addr: button pb hub addr
         :param fsr_pb_hub_addr:  fsr pb hub addr
+        :param fsr1_pb_hub_addr: fsr1 pb hub addr
         :param vibration_motor_pb_hub_addr:  vibration motor pb hub addr
         :param speaker_pb_hub_addr: pb hub addr of speaker(active buzzer)
         :param is_rgb_connected: is rgb connected to port B
@@ -93,6 +97,7 @@ class M5Telemetry:
         self.__command_handler.send_command(Commands_e.COMMAND_RESCAN_SENSORS,
                                             button_pb_hub_addr.value,
                                             fsr_pb_hub_addr.value,
+                                            fsr1_pb_hub_addr.value,
                                             vibration_motor_pb_hub_addr.value,
                                             speaker_pb_hub_addr.value,
                                             is_rgb_connected)

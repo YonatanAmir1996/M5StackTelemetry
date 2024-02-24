@@ -17,12 +17,12 @@ class Fsr(DeviceAbs.DeviceAbs):
     Represents a Force Sensing Resistor (FSR) device.
     """
 
-    def __init__(self):
+    def __init__(self, fsr_type: DeviceAbs.Device_e):
         """
         Initialize the FSR device.
         """
         # Initialize the base class
-        super().__init__(DeviceAbs.Device_e.FSR)
+        super().__init__(fsr_type)
 
         # Initialize the fsrValue attribute which will hold the FSR reading
         self.fsrValue = 0

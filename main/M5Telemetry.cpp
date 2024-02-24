@@ -34,6 +34,7 @@ void M5Telemetry::begin()
 {
     // Start M5 initialization with Port A, LCD, and Serial Connection enabled
     M5.begin(true,true,true);
+    M5.Axp.setBoostBusOutEn(true);
     supportedBitmap = 0x0;
     // Reset all device handlers to NULL
     for (uint8_t i = 0; i < (uint8_t)DEVICE_MAX_DEVICES; i++) 
@@ -89,17 +90,24 @@ void M5Telemetry::scanPaHub()
 /** 
  * @brief Scan for devices connected to the system and initialize them(In case of standalone)
  * @param buttonHubAddr PBHUB Address for the button hub.
- * @param fsrAddr PBHUB Address for the FSR.
+ * @param fsrAddr PBHUB Address for the FSR.  
+ * @param fsr1addr Address for another FSR.
  * @param vibrationMotorAddress PBHUB address for vibration motor
  * @param useRgb flag if use RGB device.
  * @details This function scans both internal and external devices, initializing and mapping them.
  */
-void M5Telemetry::scan(uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibrationMotorAddress, uint8_t speakerAddress, bool useRgb)
+void M5Telemetry::scan(uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t fsr1addr, uint8_t vibrationMotorAddress, uint8_t speakerAddress, bool useRgb)
 {
     PaHubPort_e        tempPort;
     PaHubDeviceAbs     *pPaHubDeviceHandler;
 
     M5.Lcd.printf("Scanning devices...\n");
+
+    // Reset pointers
+    for(uint8_t device = (uint8_t)DEVICE_START_ALL_DEVICES; device < (uint8_t)DEVICE_MAX_DEVICES; device++)
+    {
+        pDeviceHandlers[device] = NULL;
+    }
 
     // Internal Devices handling
     pDeviceHandlers[DEVICE_IMU] = static_cast<DeviceAbs*>(&imuDevice);
@@ -153,10 +161,17 @@ void M5Telemetry::scan(uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibration
     if(PB_HUB_PORT_INVALID_ADDR != fsrAddr)
     {
         pDeviceHandlers[DEVICE_FSR402] = static_cast<DeviceAbs*>(&fsr);
-        fsr.begin(fsrAddr);      
+        fsr.begin(fsrAddr, DEVICE_FSR402);      
         M5.Lcd.println("FSR initialized");
     }
 
+    if(PB_HUB_PORT_INVALID_ADDR != fsr1addr)
+    {
+        pDeviceHandlers[DEVICE_FSR402_1] = static_cast<DeviceAbs*>(&fsr1);
+        fsr1.begin(fsr1addr, DEVICE_FSR402_1);
+        M5.Lcd.println("FSR1 initialized");
+    }
+    
     // internal devices (interrupt / lcd handling etc...)
     if(buttonHubAddr != PB_HUB_PORT_INVALID_ADDR)   
     {
@@ -203,10 +218,9 @@ void M5Telemetry::update()
     }
 }
 
-/**
+/*
  * @brief Standalone run function to display sensor data.
  * @details Displays sensor data and manages sensor state transitions based on button presses.
- * 
  * @param standAloneUpdate Flag for standalone update mode.
  */
 void M5Telemetry::standAlonePrint(bool standAloneUpdate, uint32_t standAloneUpdateRateInMs)
@@ -216,32 +230,36 @@ void M5Telemetry::standAlonePrint(bool standAloneUpdate, uint32_t standAloneUpda
     uint32_t tsLastReport = millis();
 
     //Find first activated sensor
-    while(!pDeviceHandlers[state])
+    for(; state < DEVICE_MAX_DEVICES; state++)
     {
-        state += 1;
+        if (pDeviceHandlers[state])
+        {
+          break;
+        }
     }
 
     while(1)
     {
-        if (!standAloneUpdate && button.IfButtonPressed())
+        if (standAloneUpdate == false)
         {
-            state += 1;
-            while(!pDeviceHandlers[state])
+            if(button.IfButtonPressed())
             {
-                state += 1;
+                state++;
+                while(!pDeviceHandlers[state])
+                {
+                    state++;
+                    if(state == DEVICE_MAX_DEVICES)
+                    {
+                        state = DEVICE_START_ALL_DEVICES;
+                    }
+                }
                 if(state == DEVICE_MAX_DEVICES)
                 {
                     state = DEVICE_START_ALL_DEVICES;
                 }
             }
-
-            if(state == DEVICE_MAX_DEVICES)
-            {
-                state = DEVICE_START_ALL_DEVICES;
-            }
         }
-
-        if (standAloneUpdate)
+        else
         {
             if ((millis() - tsLastReport) > standAloneUpdateRateInMs)
             {
@@ -273,13 +291,14 @@ void M5Telemetry::standAlonePrint(bool standAloneUpdate, uint32_t standAloneUpda
  * @param forceStandAlone Forces standalone mode if true.
  * @param buttonHubAddr Address for the button hub.
  * @param fsrAddr Address for the FSR.
+ * @param fsr1addr Address for another FSR.
  * @param vibrationMotorAddress Address for vibration motor.
  * @param useRgb Flag to determine if RGB device is used.
  */
-void M5Telemetry::run(bool forceStandAlone, uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t vibrationMotorAddress, uint8_t speakerAddress, bool useRgb,
+void M5Telemetry::run(bool forceStandAlone, uint8_t buttonHubAddr, uint8_t fsrAddr, uint8_t fsr1addr, uint8_t vibrationMotorAddress, uint8_t speakerAddress, bool useRgb,
                       WifiStruct *pWifiDetails, bool forceStandAloneUpdate, uint32_t standAloneUpdateRateInMs)
 {
-    M5Tel.scan(buttonHubAddr, fsrAddr, vibrationMotorAddress, speakerAddress, useRgb);
+    M5Tel.scan(buttonHubAddr, fsrAddr, fsr1addr, vibrationMotorAddress, speakerAddress, useRgb);
     // CLI handler begin
     if((false == forceStandAlone) && commandHandler.begin(pWifiDetails))
     {
@@ -287,7 +306,6 @@ void M5Telemetry::run(bool forceStandAlone, uint8_t buttonHubAddr, uint8_t fsrAd
     }
     else
     {
-        M5.Lcd.println("In!");
         M5Tel.standAlonePrint(forceStandAloneUpdate, standAloneUpdateRateInMs); 
     }
 }
@@ -358,11 +376,13 @@ void M5Telemetry::rescanCommand()
 {
     uint8_t buttonHubAddr      = static_cast<uint8_t>(commandHandler.bufferToUint32(RxBuffer + 8));
     uint8_t fsrAddr            = static_cast<uint8_t>(commandHandler.bufferToUint32(RxBuffer + 12));
-    uint8_t vibrationMotorAddr = static_cast<uint8_t>(commandHandler.bufferToUint32(RxBuffer + 16));
-    uint8_t speakerAddress     = static_cast<uint8_t>(commandHandler.bufferToUint32(RxBuffer + 20));
-    bool    useRgb             = commandHandler.bufferToUint32(RxBuffer + 24);
+    uint8_t fsrAddr1           = static_cast<uint8_t>(commandHandler.bufferToUint32(RxBuffer + 16));
+    uint8_t vibrationMotorAddr = static_cast<uint8_t>(commandHandler.bufferToUint32(RxBuffer + 20));
+    uint8_t speakerAddress     = static_cast<uint8_t>(commandHandler.bufferToUint32(RxBuffer + 24));
+    bool    useRgb             = commandHandler.bufferToUint32(RxBuffer + 28);
 
-    M5Tel.scan(buttonHubAddr, fsrAddr, vibrationMotorAddr, speakerAddress, useRgb);
+    M5Tel.scan(buttonHubAddr, fsrAddr, fsrAddr1, vibrationMotorAddr, speakerAddress, useRgb);
+    delay(3000);
 }
 
 /**

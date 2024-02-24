@@ -17,10 +17,6 @@ if __name__ == '__main__':
     interface = M5Telemetry(is_wifi=False)
     big_array_matrix = []
     # Rescanning various devices to set their addresses.
-    interface.rescan(button_pb_hub_addr=PbHubPortAddr_e.INVALID,
-                     fsr_pb_hub_addr=PbHubPortAddr_e.INVALID,
-                     vibration_motor_pb_hub_addr=PbHubPortAddr_e.INVALID,
-                     speaker_pb_hub_addr=PbHubPortAddr_e.INVALID,
-                     is_rgb_connected=False)
+    interface.rescan(is_rgb_connected=False)
     interface.update_values([Device_e.TOF])
     big_array_matrix.append(interface.tof.mm_distances)

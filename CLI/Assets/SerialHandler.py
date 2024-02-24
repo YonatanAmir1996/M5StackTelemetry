@@ -28,13 +28,15 @@ class SerialHandler(AbsHandler):
         # Iterate over available serial ports to identify the port associated with the desired device.
         for port in serial.tools.list_ports.comports():
             if (self.pid == port.pid) and (self.vid == port.vid):
-                self.__comport = port.name
+                if os.name == 'posix':
+                    self.__comport = os.path.join(r"/dev", port.name)
+                else:
+                    self.__comport = port.name
 
         # Configure the serial connection using the identified port and specified baud rate.
-        self.__serial = serial.Serial()
+        self.__serial = serial.Serial(timeout=3)
         self.__serial.baudrate = baudrate
         self.__serial.port = self.__comport
-        self.__timeout = 30
         # Try to establish the serial connection.
         self.connect()
 
