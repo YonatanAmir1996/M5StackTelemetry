@@ -5,9 +5,9 @@
 // Wifi details are hardcoded
 WifiStruct wifiDetails = 
 {
-    .ssid = "Yonatan",
-    .password = "a1234567",
-    .serverAddress = "192.168.119.193", // need to check ip address(ipconfig in windows or hostname -I in raspberry pi) of server and set it here !
+    .ssid = "Controllab_Projects",
+    .password = "Controllab",
+    .serverAddress = "192.168.0.101", // need to check ip address(ipconfig in windows or hostname -I in raspberry pi) of server and set it here !
     .serverPort = 9000
 };
 
