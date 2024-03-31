@@ -25,11 +25,11 @@ def poll_devices(m5_telemetry_interface: M5Telemetry, to_set: bool, motor_pwm: i
     print(m5_telemetry_interface.imu)  # Accessing the 'imu' attribute from M5Telemetry object.
     print(m5_telemetry_interface.amg)  # Accessing the 'amg' attribute from M5Telemetry object.
     print(m5_telemetry_interface.tof)  # Accessing the 'tof' attribute from M5Telemetry object.
-    if to_set:
-        # Setting values on various devices through the M5Telemetry object.
-        # m5_telemetry_interface.command_set_speaker()
-        m5_telemetry_interface.command_set_rgb(0, rgb, 0, 0)
-        # m5_telemetry_interface.command_set_motor(motor_pwm)
+    # if to_set:
+    #     # Setting values on various devices through the M5Telemetry object.
+    #     # m5_telemetry_interface.command_set_speaker()
+    #     m5_telemetry_interface.command_set_rgb(0, rgb, 0, 0)
+    #     # m5_telemetry_interface.command_set_motor(motor_pwm)
 
 
 if __name__ == '__main__':
@@ -38,7 +38,7 @@ if __name__ == '__main__':
 
     # Rescanning various devices to set their addresses.
     interface.rescan(button_pb_hub_addr=PbHubPortAddr_e.INVALID,
-                     fsr_pb_hub_addr=PbHubPortAddr_e.INVALID,
+                     fsr_pb_hub_addr=PbHubPortAddr_e.PORT_0,
                      vibration_motor_pb_hub_addr=PbHubPortAddr_e.INVALID,
                      speaker_pb_hub_addr=PbHubPortAddr_e.INVALID,
                      is_rgb_connected=False)

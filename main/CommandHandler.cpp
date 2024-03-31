@@ -3,7 +3,7 @@
 #include "CommandHandler.h"
 
 
-#define MAX_RETRIES 10
+#define MAX_RETRIES 50
 #define WORD_NUM_OF_BYTES 4 
 
 WiFiClient client;

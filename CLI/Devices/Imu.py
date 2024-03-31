@@ -24,7 +24,7 @@ class Imu(DeviceAbs.DeviceAbs):
             self.z = z
 
         def __str__(self):
-            return f"GyroData(x={self.x:4.0f}, y={self.y:4.0f}, z={self.z:4.0f})"
+            return f"GyroData(x={self.x:4.2f}, y={self.y:4.2f}, z={self.z:4.2f})"
 
     class AccelData:
         """
@@ -36,7 +36,7 @@ class Imu(DeviceAbs.DeviceAbs):
             self.z = z
 
         def __str__(self):
-            return f"AccelData(x={self.x:4.0f}, y={self.y:4.0f}, z={self.z:4.0f})"
+            return f"AccelData(x={self.x:4.2f}, y={self.y:4.2f}, z={self.z:4.2f})"
 
     def __init__(self):
         """
