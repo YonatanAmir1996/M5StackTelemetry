@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2024-04-27T19:03:01.088Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36" etag="37efSRkuOPX0bbNU3DXp" version="24.3.1" type="device">
+<mxfile host="app.diagrams.net" modified="2024-04-28T18:48:43.396Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36" etag="9kh78Lrl8ZB2qZVjIzNk" version="24.3.1" type="device">
   <diagram name="Page-1" id="L8j-c3YBWOeJJrME1N-z">
     <mxGraphModel dx="1434" dy="786" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -83,10 +83,10 @@
         <mxCell id="5uGWzuY_lre10eIsBFzZ-18" value="I2C" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;startArrow=classic;startFill=1;" parent="1" source="5uGWzuY_lre10eIsBFzZ-15" target="5uGWzuY_lre10eIsBFzZ-17" edge="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="5uGWzuY_lre10eIsBFzZ-15" value="Proximity Sensor&lt;div&gt;(TOF)&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+        <mxCell id="5uGWzuY_lre10eIsBFzZ-15" value="Proximity Sensor&lt;div&gt;(TOF)&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
           <mxGeometry x="560" y="160" width="120" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="5uGWzuY_lre10eIsBFzZ-17" value="Thermal Sensor&lt;div&gt;(AMG)&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+        <mxCell id="5uGWzuY_lre10eIsBFzZ-17" value="Thermal Sensor&lt;div&gt;(AMG)&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
           <mxGeometry x="560" y="40" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="5uGWzuY_lre10eIsBFzZ-19" value="I2C Connections can either be daisy-chained or connected through different ports in the PaHub" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
@@ -104,16 +104,16 @@
         <mxCell id="5uGWzuY_lre10eIsBFzZ-25" value="Vibration Motor" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="870" y="525" width="120" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="5uGWzuY_lre10eIsBFzZ-29" value="Analog Pressure Sensor" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+        <mxCell id="5uGWzuY_lre10eIsBFzZ-29" value="Analog Pressure Sensor" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
           <mxGeometry x="870" y="170" width="120" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="5uGWzuY_lre10eIsBFzZ-31" value="Button" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+        <mxCell id="5uGWzuY_lre10eIsBFzZ-31" value="Button" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
           <mxGeometry x="870" y="350" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="5uGWzuY_lre10eIsBFzZ-32" value="Inputs are represented as sharp edge rectangles,&lt;div&gt;outputs as rounded edge rectangles.&lt;/div&gt;" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
           <mxGeometry x="120" y="230" width="180" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="5uGWzuY_lre10eIsBFzZ-35" value="Heartrate&lt;div&gt;Sensor&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+        <mxCell id="5uGWzuY_lre10eIsBFzZ-35" value="Heartrate&lt;div&gt;Sensor&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
           <mxGeometry x="870" y="250" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="R8gsrFvR6E6c9GJMRXPF-1" value="*Raspberry Pi only supports communication via WiFi" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" parent="1" vertex="1">
@@ -132,7 +132,7 @@
             <mxPoint x="390" y="380" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="5uGWzuY_lre10eIsBFzZ-4" value="IMU" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+        <mxCell id="5uGWzuY_lre10eIsBFzZ-4" value="IMU" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
           <mxGeometry x="420" y="290" width="120" height="50" as="geometry" />
         </mxCell>
       </root>
